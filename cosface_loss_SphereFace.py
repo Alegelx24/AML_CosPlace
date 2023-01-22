@@ -12,7 +12,7 @@ import math
 
 class AngularPenaltySMLoss(nn.Module):
 
-    def __init__(self, in_features, out_features, eps=1e-7, s=None, m=None):
+    def __init__(self, in_features, out_features, s=None, m=None):
         '''
         Angular Penalty Softmax Loss
         Three 'loss_types' available: ['arcface', 'sphereface', 'cosface']
@@ -30,7 +30,6 @@ class AngularPenaltySMLoss(nn.Module):
         self.in_features = in_features
         self.out_features = out_features
         self.fc = nn.Linear(in_features, out_features, bias=False)
-        self.eps = eps
 
     def forward(self, x, labels):
         '''
