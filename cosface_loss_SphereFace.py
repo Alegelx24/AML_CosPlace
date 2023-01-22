@@ -54,10 +54,11 @@ class AngularPenaltySMLoss(nn.Module):
 
 """
 
-def myphi(x,m):
-    x = x * m
-    return 1-x**2/math.factorial(2)+x**4/math.factorial(4)-x**6/math.factorial(6) + \
-            x**8/math.factorial(8) - x**9/math.factorial(9)
+def cosine_sim(x1: torch.Tensor, x2: torch.Tensor, dim: int = 1, eps: float = 1e-8) -> torch.Tensor:
+    ip = torch.mm(x1, x2.t())
+    w1 = torch.norm(x1, 2, dim)
+    w2 = torch.norm(x2, 2, dim)
+    return ip / torch.ger(w1, w2).clamp(min=eps)
 
 class AngleLinear(nn.Module):
     def __init__(self, in_features, out_features, s=None, m=1.5):
@@ -77,33 +78,32 @@ class AngleLinear(nn.Module):
             lambda x: 16*x**5-20*x**3+5*x
         ]
 
-    def forward(self, input):
-        x = input   # size=(B,F)    F is feature len
-        w = self.weight # size=(F,Classnum) F=in_features Classnum=out_features
+   
 
-        ww = w.renorm(2,1,1e-5).mul(1e5)
-        xlen = x.pow(2).sum(1).pow(0.5) # size=B
-        wlen = ww.pow(2).sum(0).pow(0.5) # size=Classnum
+    def forward(self, inputs: torch.Tensor, label: torch.Tensor) -> torch.Tensor:
+        #Cosine similarity between x and weights.
+        cosine = cosine_sim(inputs, self.weight)
+        one_hot = torch.zeros_like(cosine)
+        #label.view => vettore colonna. 
+        #Mette m solo dove c'è yi. Il resto rimane senza m. 
+        one_hot.scatter_(1, label.view(-1, 1), 1.0)
+        
+        #Formulations from https://github.com/clcarwin/sphereface_pytorch
+        cos_m_theta = self.mlambda[self.m](cosine)
+        theta = Variable(cosine.acos())
+        k = (self.m*theta/3.14159265).floor()
+        n_one = k*0.0 - 1
+        
+        phi_theta = (n_one**k) * cos_m_theta - 2*k
+        #x_norm = inputs.pow(2).sum(1).pow(0.5)
+        #x_norm = torch.norm(inputs, 2, dim=1)
+        #x_norm = x_norm.view(-1, 1)
+        my_cosine_vector = one_hot * phi_theta + (1.0-one_hot) * cosine
+        
+        output = self.s * (my_cosine_vector)
 
-        cos_theta = x.mm(ww) # size=(B,Classnum)
-        cos_theta = cos_theta / xlen.view(-1,1) / wlen.view(1,-1)
-        cos_theta = cos_theta.clamp(-1,1)
-
-        if self.phiflag:
-            cos_m_theta = self.mlambda[self.m](cos_theta)
-            theta = Variable(cos_theta.data.acos())
-            k = (self.m*theta/3.14159265).floor()
-            n_one = k*0.0 - 1
-            phi_theta = (n_one**k) * cos_m_theta - 2*k
-        else:
-            theta = cos_theta.acos()
-            phi_theta = myphi(theta,self.m)
-            phi_theta = phi_theta.clamp(-1*self.m,1)
-
-        cos_theta = cos_theta * xlen.view(-1,1)
-        phi_theta = phi_theta * xlen.view(-1,1)
-        output = (cos_theta,phi_theta)
-        return output # size=(B,Classnum,2)
+        #output sul quale verrà applicata la cross entropy loss.
+        return output
 
 
 class AngleLoss(nn.Module):
