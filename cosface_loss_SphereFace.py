@@ -13,13 +13,7 @@ def cosine_sim(x1: torch.Tensor, x2: torch.Tensor, dim: int = 1, eps: float = 1e
 
 
 class MarginCosineProduct(nn.Module):
-    """Implement of large margin cosine distance:
-    Args:
-        in_features: size of each input sample
-        out_features: size of each output sample
-        s: norm of input feature
-        m: margin
-    """
+
     def __init__(self, in_features: int, out_features: int, s: float = 30.0, m: int = 3):
         super().__init__()
         self.in_features = in_features
