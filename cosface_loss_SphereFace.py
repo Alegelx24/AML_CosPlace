@@ -60,7 +60,7 @@ def myphi(x,m):
             x**8/math.factorial(8) - x**9/math.factorial(9)
 
 class AngleLinear(nn.Module):
-    def __init__(self, in_features, out_features,s, m = 4):
+    def __init__(self, in_features, out_features, s=None, m=1.5):
         super(AngleLinear, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
