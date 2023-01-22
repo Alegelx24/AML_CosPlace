@@ -10,6 +10,50 @@ import math
 
 
 
+class AngularPenaltySMLoss(nn.Module):
+
+    def __init__(self, in_features, out_features, eps=1e-7, s=None, m=None):
+        '''
+        Angular Penalty Softmax Loss
+        Three 'loss_types' available: ['arcface', 'sphereface', 'cosface']
+        These losses are described in the following papers: 
+        
+        ArcFace: https://arxiv.org/abs/1801.07698
+        SphereFace: https://arxiv.org/abs/1704.08063
+        CosFace/Ad Margin: https://arxiv.org/abs/1801.05599
+        '''
+        super(AngularPenaltySMLoss, self).__init__()
+
+        self.s = 64.0 if not s else s
+        self.m = 1.35 if not m else m
+
+        self.in_features = in_features
+        self.out_features = out_features
+        self.fc = nn.Linear(in_features, out_features, bias=False)
+        self.eps = eps
+
+    def forward(self, x, labels):
+        '''
+        input shape (N, in_features)
+        '''
+
+        for W in self.fc.parameters():
+            W = F.normalize(W, p=2, dim=1)
+
+        x = F.normalize(x, p=2, dim=1)
+
+        wf = self.fc(x)
+        numerator = self.s * torch.cos(self.m * torch.acos(torch.clamp(torch.diagonal(wf.transpose(0, 1)[labels]), -1.+self.eps, 1-self.eps)))
+
+        excl = torch.cat([torch.cat((wf[i, :y], wf[i, y+1:])).unsqueeze(0) for i, y in enumerate(labels)], dim=0)
+        denominator = torch.exp(numerator) + torch.sum(torch.exp(self.s * excl), dim=1)
+        L = numerator - torch.log(denominator)
+        return -torch.mean(L)
+
+
+
+
+"""
 
 def myphi(x,m):
     x = x * m
@@ -62,3 +106,38 @@ class AngleLinear(nn.Module):
         output = (cos_theta,phi_theta)
         return output # size=(B,Classnum,2)
 
+
+class AngleLoss(nn.Module):
+    def __init__(self, gamma=0):
+        super(AngleLoss, self).__init__()
+        self.gamma   = gamma
+        self.it = 0
+        self.LambdaMin = 5.0
+        self.LambdaMax = 1500.0
+        self.lamb = 1500.0
+
+    def forward(self, input, target):
+        self.it += 1
+        cos_theta,phi_theta = input
+        target = target.view(-1,1) #size=(B,1)
+
+        index = cos_theta.data * 0.0 #size=(B,Classnum)
+        index.scatter_(1,target.data.view(-1,1),1)
+        index = index.byte()
+        index = Variable(index)
+
+        self.lamb = max(self.LambdaMin,self.LambdaMax/(1+0.1*self.it ))
+        output = cos_theta * 1.0 #size=(B,Classnum)
+        output[index] -= cos_theta[index]*(1.0+0)/(1+self.lamb)
+        output[index] += phi_theta[index]*(1.0+0)/(1+self.lamb)
+
+        logpt = F.log_softmax(output)
+        logpt = logpt.gather(1,target)
+        logpt = logpt.view(-1)
+        pt = Variable(logpt.data.exp())
+
+        loss = -1 * (1-pt)**self.gamma * logpt
+        loss = loss.mean()
+
+        return loss
+"""
