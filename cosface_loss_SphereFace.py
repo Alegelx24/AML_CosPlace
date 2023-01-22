@@ -60,13 +60,13 @@ def myphi(x,m):
             x**8/math.factorial(8) - x**9/math.factorial(9)
 
 class AngleLinear(nn.Module):
-    def __init__(self, in_features, out_features, m = 4, phiflag=True):
+    def __init__(self, in_features, out_features,s, m = 4):
         super(AngleLinear, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.weight = Parameter(torch.Tensor(in_features,out_features))
         self.weight.data.uniform_(-1, 1).renorm_(2,1,1e-5).mul_(1e5)
-        self.phiflag = phiflag
+        self.phiflag = True
         self.m = m
         self.mlambda = [
             lambda x: x**0,
