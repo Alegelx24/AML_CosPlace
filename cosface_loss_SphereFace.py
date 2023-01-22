@@ -9,7 +9,7 @@ import math
 
 
 
-
+"""
 class AngularPenaltySMLoss(nn.Module):
 
     def __init__(self, in_features, out_features, s=None, m=None):
@@ -139,4 +139,3 @@ class AngleLoss(nn.Module):
         loss = loss.mean()
 
         return loss
-"""
