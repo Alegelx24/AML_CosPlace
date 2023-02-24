@@ -14,6 +14,7 @@ CHANNELS_NUM_IN_LAST_CONV = {
     "ResNet101": 2048,
     "ResNet152": 2048,
     "VGG16": 512,
+    "ConvNext_base": 1024
 }
 
 
@@ -71,7 +72,16 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
             for p in layer.parameters():
                 p.requires_grad = False
         logging.debug("Train last layers of the VGG-16, freeze the previous ones")
-    
+   
+    elif backbone_name == "ConvNext_base":
+       for name, child in backbone.named_children():
+            if name == "layer3":  # Freeze layers before conv_3
+                break
+            for params in child.parameters():
+                params.requires_grad = False
+       logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
+       layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
+
     backbone = torch.nn.Sequential(*layers)
     
     features_dim = CHANNELS_NUM_IN_LAST_CONV[backbone_name]
