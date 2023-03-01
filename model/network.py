@@ -18,7 +18,9 @@ CHANNELS_NUM_IN_LAST_CONV = {
     "ConvNext_tiny": 768,
     "efficientnet_v2_l": 1280,
     "mobilenet_v2" : 3,
-    "MNASNET1_3": 3
+    "MNASNET1_3": 3,
+    "efficientnet_b0": 1280,
+    "resnext50_32x4d": 2048
 
 }
 
@@ -119,6 +121,24 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
 
     
     elif backbone_name == "MNASNET1_3":
+        for name, child in backbone.named_children():
+                if name == "layer3":  # Freeze layers before conv_3
+                    break
+                for params in child.parameters():
+                    params.requires_grad = False
+        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
+        layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
+
+    elif backbone_name == "efficientnet_b0":
+        for name, child in backbone.named_children():
+                if name == "layer3":  # Freeze layers before conv_3
+                    break
+                for params in child.parameters():
+                    params.requires_grad = False
+        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
+        layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
+
+    elif backbone_name == "resnext50_32x4d":
         for name, child in backbone.named_children():
                 if name == "layer3":  # Freeze layers before conv_3
                     break
