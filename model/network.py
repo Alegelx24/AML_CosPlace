@@ -29,7 +29,7 @@ CHANNELS_NUM_IN_LAST_CONV = {
 
 
 class GeoLocalizationNet(nn.Module):
-    def __init__(self, backbone : str, fc_output_dim : int):
+    def __init__(self, backbone : str, fc_output_dim : int, grl_discriminator=None):
         """Return a model for GeoLocalization.
         
         Args:
@@ -39,6 +39,9 @@ class GeoLocalizationNet(nn.Module):
         super().__init__()
         assert backbone in CHANNELS_NUM_IN_LAST_CONV, f"backbone must be one of {list(CHANNELS_NUM_IN_LAST_CONV.keys())}"
         self.backbone, features_dim = get_backbone(backbone)
+
+        self.grl_discriminator=grl_discriminator
+        
         self.aggregation = nn.Sequential(
             L2Norm(),
             GeM(),
@@ -47,9 +50,16 @@ class GeoLocalizationNet(nn.Module):
             L2Norm()
         )
     
-    def forward(self, x):
-        x = self.backbone(x)
-        x = self.aggregation(x)
+    def forward(self, x, grl=False):
+
+        if grl:
+            x = self.backbone(x)
+            x= self.grl_discriminator(x)
+        else:
+
+            x = self.backbone(x)
+            x = self.aggregation(x)
+       
         return x
 
 

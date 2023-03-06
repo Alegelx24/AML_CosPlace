@@ -57,6 +57,11 @@ def parse_arguments(is_training: bool = True):
                         help="path of the folder with train/val/test sets")
     parser.add_argument("--save_dir", type=str, default="default",
                         help="name of directory on which to save the logs, under logs/save_dir")
+    #DOMAIN ADAPTATION
+    parser.add_argument("--grl", type=bool, default=False, help="_")
+    parser.add_argument("--dataset_root", type=str, default=None, help="_")
+    parser.add_argument("--grl_datasets", type=str, default=None, help="_")
+
     
     args = parser.parse_args()
     

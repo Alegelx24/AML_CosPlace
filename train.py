@@ -8,7 +8,6 @@ if __name__ == '__main__' :
     import multiprocessing
     from datetime import datetime
     import torchvision.transforms as T
-
     import test
     import util
     import parser_1
@@ -17,10 +16,13 @@ if __name__ == '__main__' :
     import cosface_loss_ArcFace
     import cosface_loss_SphereFace
     import model_soup
+    import GradientReversalLayer as GRL
     import augmentations
     from model import network
     from datasets.test_dataset import TestDataset
     from datasets.train_dataset import TrainDataset
+    from datasets.grl_dataset import GrlDataset
+    from torch.utils.data.dataloader import DataLoader
 
 
     torch.backends.cudnn.benchmark = True  # Provides a speedup
@@ -34,8 +36,15 @@ if __name__ == '__main__' :
     logging.info(f"Arguments: {args}")
     logging.info(f"The outputs are being saved in {output_folder}")
 
+    encoder_dim=512
+
+    if args.grl:
+        grl_discriminator = GRL.get_discriminator(encoder_dim, len(args.grl_datasets.split("+")))
+    else:
+        grl_discriminator = None
+
     #### Model
-    model = network.GeoLocalizationNet(args.backbone, args.fc_output_dim)
+    model = network.GeoLocalizationNet(args.backbone, args.fc_output_dim, grl_discriminator)
 
     logging.info(f"There are {torch.cuda.device_count()} GPUs and {multiprocessing.cpu_count()} CPUs.")
 
@@ -95,15 +104,20 @@ if __name__ == '__main__' :
                                                         hue=args.hue),
                 augmentations.DeviceAgnosticRandomResizedCrop([512, 512],
                                                             scale=[1-args.random_resized_crop, 1]),
-                augmentations.DeviceAgnosticRandomPerspective(),
-                augmentations.DeviceAgnosticAdjustGamma(gamma=args.gamma, gain=1.2),
+             #   augmentations.DeviceAgnosticRandomPerspective(),
+              #  augmentations.DeviceAgnosticAdjustGamma(gamma=args.gamma, gain=1.2),
                 T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ])
 
     if args.use_amp16:
         scaler = torch.cuda.amp.GradScaler()
 
-    '''
+    if args.grl:   
+        grl_dataset = GrlDataset(args.dataset_root, args.grl_datasets.split("+"))
+        grl_loss_weight=0.3
+    else:
+        grl_dataset=None
+    
     for epoch_num in range(start_epoch_num, args.epochs_num):
         
         #### Train
@@ -112,6 +126,12 @@ if __name__ == '__main__' :
         current_group_num = epoch_num % args.groups_num
         classifiers[current_group_num] = classifiers[current_group_num].to(args.device)
         util.move_to_device(classifiers_optimizers[current_group_num], args.device)
+
+        if args.grl:
+            epoch_grl_loss = 0
+            cross_entropy_loss = torch.nn.CrossEntropyLoss()
+            grl_dataloader = DataLoader(dataset=grl_dataset, num_workers=args.num_workers,
+                                        batch_size=args.batch_size, shuffle=True, pin_memory=(args.device == "cuda"))
         
         dataloader = commons.InfiniteDataLoader(groups[current_group_num], num_workers=args.num_workers,
                                                 batch_size=args.batch_size, shuffle=True,
@@ -151,7 +171,17 @@ if __name__ == '__main__' :
                 scaler.step(model_optimizer)
                 scaler.step(classifiers_optimizers[current_group_num])
                 scaler.update()
+
+            if args.grl:
+                images, labels = next(iter(grl_dataloader))
+                images, labels = images.to(args.device), labels.to(args.device)
+                outputs = model(images, grl=True)
+                loss_grl = cross_entropy_loss(outputs, labels)
+                (loss_grl *grl_loss_weight ).backward()
+                epoch_grl_loss += loss_grl.item()
+                del images, labels, outputs, loss_grl
         
+
         classifiers[current_group_num] = classifiers[current_group_num].cpu()
         util.move_to_device(classifiers_optimizers[current_group_num], "cpu")
         
@@ -175,12 +205,10 @@ if __name__ == '__main__' :
 
 
     logging.info(f"Trained for {epoch_num+1:02d} epochs, in total in {str(datetime.now() - start_time)[:-7]}")
-    '''
+    
 
     #### Test best model on test set v1
-    state_dicts = model_soup.load_models()
-    alphal = [1 / len(state_dicts) for i in range(len(state_dicts))]
-    model = model_soup.get_model_soup(model, state_dicts, alphal)
+
     
     '''
     if args.model_soupe_uniform:
@@ -195,10 +223,10 @@ if __name__ == '__main__' :
             model.load_state_dict(best_model_state_dict)
     '''
  
-    '''
+    
     best_model_state_dict = torch.load(f"{output_folder}/best_model.pth")
     model.load_state_dict(best_model_state_dict)
-    '''
+    
 
     logging.info(f"Now testing on the test set: {test_ds}")
     recalls, recalls_str = test.test(args, test_ds, model)
