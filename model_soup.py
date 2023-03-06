@@ -1,5 +1,4 @@
 import torch
-import clip
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -14,9 +13,13 @@ def load_models():
     state_dicts = []
     
     #for f in os.listdir(directory_name_that_contains_different_best_model.pth)
+    #in colab the folder soup_checpoints should stay inside content folde at the same level (parallel) of sample_data and AML_Cosplace folder
+    print("Current working directory: {0}".format(os.getcwd()))
+    os.chdir('/content/soup_checkpoints')
+
     for f in os.listdir():
         print (f)
-        if f[-2:] == 'pth':
+        if f[-3:] == 'pth':
             print(f'Loading {f}')
             state_dicts.append(torch.load(f, map_location=device))
     return state_dicts
