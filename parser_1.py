@@ -14,7 +14,7 @@ def parse_arguments(is_training: bool = True):
     parser.add_argument("--min_images_per_class", type=int, default=10, help="_")
     # Model parameters
     parser.add_argument("--backbone", type=str, default="ResNet18",
-                        choices=["VGG16", "ResNet18", "ResNet50", "ResNet101", "ResNet152", "ConvNext_base", "ConvNext_tiny", "efficientnet_v2_l", "mobilenet_v2", "MNASNET1_3","efficientnet_b0","resnext50_32x4d"], help="_")
+                        choices=["VGG16", "ResNet18", "ResNet50", "ResNet101", "ResNet152", "ConvNext_base", "ConvNext_tiny", "efficientnet_v2_l", "mobilenet_v2", "MNASNET1_3","efficientnet_b0","resnext50_32x4d","maxvit_t","vit_b_32"], help="_")
     parser.add_argument("--fc_output_dim", type=int, default=512,
                         help="Output dimension of final fully connected layer")
     # Training parameters
@@ -33,6 +33,9 @@ def parse_arguments(is_training: bool = True):
     parser.add_argument("--contrast", type=float, default=0.7, help="_")
     parser.add_argument("--hue", type=float, default=0.5, help="_")
     parser.add_argument("--saturation", type=float, default=0.7, help="_")
+
+    parser.add_argument("--gamma", type=float, default=0.7, help="_")
+
     parser.add_argument("--random_resized_crop", type=float, default=0.5, help="_")
     # Validation / test parameters
     parser.add_argument("--infer_batch_size", type=int, default=16,
