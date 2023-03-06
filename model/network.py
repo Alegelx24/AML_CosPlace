@@ -20,8 +20,9 @@ CHANNELS_NUM_IN_LAST_CONV = {
     "mobilenet_v2" : 3,
     "MNASNET1_3": 3,
     "efficientnet_b0": 1280,
-    "resnext50_32x4d": 2048
-
+    "resnext50_32x4d": 2048,
+    "maxvit_t" : 64,
+    "vit_b_32":768
 }
 
 
@@ -147,9 +148,27 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
         logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
         layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
 
+    elif backbone_name == "maxvit_t":
+        for name, child in backbone.named_children():
+               
+                for params in child.parameters():
+                    params.requires_grad = False
+        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
+        layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
+    
+    elif backbone_name == "vit_b_32":
+        for name, child in backbone.named_children():
+               
+                for params in child.parameters():
+                    params.requires_grad = False
+        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
+        layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
+
     backbone = torch.nn.Sequential(*layers)
     
     features_dim = CHANNELS_NUM_IN_LAST_CONV[backbone_name]
     
     return backbone, features_dim
+
+
 

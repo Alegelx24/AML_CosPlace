@@ -2,6 +2,8 @@
 import torch
 from typing import Tuple, Union
 import torchvision.transforms as T
+import torchvision.transforms.functional as TF
+import random
 
 
 class DeviceAgnosticColorJitter(T.ColorJitter):
@@ -33,6 +35,44 @@ class DeviceAgnosticRandomResizedCrop(T.RandomResizedCrop):
         augmented_images = [random_resized_crop(img).unsqueeze(0) for img in images]
         augmented_images = torch.cat(augmented_images)
         return augmented_images
+    
+class DeviceAgnosticRandomPerspective(T.RandomPerspective):
+    def __init__(self, distortion_scale: float=0.3, p: float=0.3):
+        """This is the same as T.RandomResizedCrop but it only accepts batches of images and works on GPU"""
+        super().__init__(distortion_scale=distortion_scale, p=p)
+    
+    def forward(self, images: torch.Tensor) -> torch.Tensor:
+        assert len(images.shape) == 4, f"images should be a batch of images, but it has shape {images.shape}"
+        B, C, H, W = images.shape
+        # Applies a different perspective to each image
+        random_resized_crop = super(DeviceAgnosticRandomPerspective, self).forward
+        augmented_images = [random_resized_crop(img).unsqueeze(0) for img in images]
+        augmented_images = torch.cat(augmented_images)
+        return augmented_images
+
+class DeviceAgnosticAdjustGamma():
+    def __init__(self, gamma:float, gain=1):
+        """This is the same as TF.adjustGamma but it only accepts batches of images and works on GPU"""
+        self.gamma=gamma
+        self.gain=gain
+    
+    def __call__(self, images: torch.Tensor) -> torch.Tensor:
+        assert len(images.shape) == 4, f"images should be a batch of images, but it has shape {images.shape}"
+        B, C, H, W = images.shape
+
+        augmented_images = []
+        for img in images:
+            random_value= random.random()
+            if  random_value< 0.5:
+                augmented_img = TF.adjust_gamma(img,self.gamma).unsqueeze(0)
+                augmented_images.append(augmented_img)
+            else:
+                augmented_images.append(img.unsqueeze(0))
+
+        augmented_images = torch.cat(augmented_images)
+        assert augmented_images.shape == torch.Size([B, C, H, W])
+        return augmented_images
+
 
 
 if __name__ == "__main__":
