@@ -16,6 +16,7 @@ if __name__ == '__main__' :
     import cosface_loss
     import cosface_loss_ArcFace
     import cosface_loss_SphereFace
+    import model_soup
     import augmentations
     from model import network
     from datasets.test_dataset import TestDataset
@@ -102,6 +103,7 @@ if __name__ == '__main__' :
     if args.use_amp16:
         scaler = torch.cuda.amp.GradScaler()
 
+    '''
     for epoch_num in range(start_epoch_num, args.epochs_num):
         
         #### Train
@@ -173,10 +175,30 @@ if __name__ == '__main__' :
 
 
     logging.info(f"Trained for {epoch_num+1:02d} epochs, in total in {str(datetime.now() - start_time)[:-7]}")
+    '''
 
     #### Test best model on test set v1
+    state_dicts = model_soup.load_models()
+    alphal = [1 / len(state_dicts) for i in range(len(state_dicts))]
+    model = model_soup.get_model_soup(model, state_dicts, alphal)
+    
+    '''
+    if args.model_soupe_uniform:
+        state_dicts = model_soup.load_models()
+        model = model_soup.get_model_soup()
+    else:
+        if args.model_soupe_greedy:
+            #.....
+            
+        else:
+            best_model_state_dict = torch.load(f"{output_folder}/best_model.pth")
+            model.load_state_dict(best_model_state_dict)
+    '''
+ 
+    '''
     best_model_state_dict = torch.load(f"{output_folder}/best_model.pth")
     model.load_state_dict(best_model_state_dict)
+    '''
 
     logging.info(f"Now testing on the test set: {test_ds}")
     recalls, recalls_str = test.test(args, test_ds, model)
