@@ -34,9 +34,11 @@ def parse_arguments(is_training: bool = True):
     parser.add_argument("--hue", type=float, default=0.5, help="_")
     parser.add_argument("--saturation", type=float, default=0.7, help="_")
 
+    # Pre Processing Augmentation
+    parser.add_argument("--preprocessing", type=bool, default=False, help="_")
     parser.add_argument("--gamma", type=float, default=0.7, help="_")
-
     parser.add_argument("--random_resized_crop", type=float, default=0.5, help="_")
+
     # Validation / test parameters
     parser.add_argument("--infer_batch_size", type=int, default=16,
                         help="Batch size for inference (validating and testing)")

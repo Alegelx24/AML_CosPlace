@@ -17,7 +17,6 @@ class GradientReversalFunction(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grads):
         dx = -grads.new_tensor(1) * grads
-        print("sono del GRL-------------------------------")
         return dx, None
 
 class GradientReversal(torch.nn.Module):

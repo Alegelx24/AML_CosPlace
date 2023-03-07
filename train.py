@@ -97,17 +97,28 @@ if __name__ == '__main__' :
 
 
     if args.augmentation_device == "cuda":
-        gpu_augmentation = T.Compose([
-                augmentations.DeviceAgnosticColorJitter(brightness=args.brightness,
-                                                        contrast=args.contrast,
-                                                        saturation=args.saturation,
-                                                        hue=args.hue),
-                augmentations.DeviceAgnosticRandomResizedCrop([512, 512],
-                                                            scale=[1-args.random_resized_crop, 1]),
-             #   augmentations.DeviceAgnosticRandomPerspective(),
-              #  augmentations.DeviceAgnosticAdjustGamma(gamma=args.gamma, gain=1.2),
-                T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            ])
+        if args.preprocessing == True:
+            gpu_augmentation = T.Compose([
+                    augmentations.DeviceAgnosticColorJitter(brightness=args.brightness,
+                                                            contrast=args.contrast,
+                                                            saturation=args.saturation,
+                                                            hue=args.hue),
+                    augmentations.DeviceAgnosticRandomResizedCrop([512, 512],
+                                                                scale=[1-args.random_resized_crop, 1]),
+                   augmentations.DeviceAgnosticRandomPerspective(),
+                  augmentations.DeviceAgnosticAdjustGamma(gamma=args.gamma, gain=1.2),
+                    T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                ])
+        else: 
+             gpu_augmentation = T.Compose([
+                    augmentations.DeviceAgnosticColorJitter(brightness=args.brightness,
+                                                            contrast=args.contrast,
+                                                            saturation=args.saturation,
+                                                            hue=args.hue),
+                    augmentations.DeviceAgnosticRandomResizedCrop([512, 512],
+                                                                scale=[1-args.random_resized_crop, 1]),
+                    T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                ])
 
     if args.use_amp16:
         scaler = torch.cuda.amp.GradScaler()
