@@ -30,7 +30,7 @@ if __name__ == '__main__':
     if args.resume_model is not None:
         logging.info(f"Loading model from {args.resume_model}")
         model_state_dict = torch.load(args.resume_model)
-        if args.domain_adaptation:
+        if args.grl:
             del model_state_dict["discriminator.1.weight"]
             del model_state_dict["discriminator.1.bias"]
             del model_state_dict["discriminator.3.weight"]
