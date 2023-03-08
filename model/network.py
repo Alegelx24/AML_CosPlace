@@ -40,7 +40,7 @@ class GeoLocalizationNet(nn.Module):
         assert backbone in CHANNELS_NUM_IN_LAST_CONV, f"backbone must be one of {list(CHANNELS_NUM_IN_LAST_CONV.keys())}"
         self.backbone, features_dim = get_backbone(backbone)
 
-        self.grl_discriminator=grl_discriminator
+        self.grl_discriminator=grl_discriminator #NEED TO PASS FEATURES DIM AS PARAMETER?
         
         self.aggregation = nn.Sequential(
             L2Norm(),

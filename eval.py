@@ -30,6 +30,13 @@ if __name__ == '__main__':
     if args.resume_model is not None:
         logging.info(f"Loading model from {args.resume_model}")
         model_state_dict = torch.load(args.resume_model)
+        if args.domain_adaptation:
+            del model_state_dict["discriminator.1.weight"]
+            del model_state_dict["discriminator.1.bias"]
+            del model_state_dict["discriminator.3.weight"]
+            del model_state_dict["discriminator.3.bias"]
+            del model_state_dict["discriminator.5.weight"]
+            del model_state_dict["discriminator.5.bias"]
         model.load_state_dict(model_state_dict)
     else:
         logging.info("WARNING: You didn't provide a path to resume the model (--resume_model parameter). " +
