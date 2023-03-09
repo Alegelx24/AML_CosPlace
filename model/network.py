@@ -29,7 +29,7 @@ CHANNELS_NUM_IN_LAST_CONV = {
     "swin_t": 768,
     "SWIN_V2_B": 1024,
     "shufflenet_v2_x2_0": 976,
-    "regnet_y_1_6gf": 512
+    "regnet_y_1_6gf": 888
 
 }
 
