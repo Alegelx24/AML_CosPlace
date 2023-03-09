@@ -14,7 +14,7 @@ def parse_arguments(is_training: bool = True):
     parser.add_argument("--min_images_per_class", type=int, default=10, help="_")
     # Model parameters
     parser.add_argument("--backbone", type=str, default="ResNet18",
-                        choices=["VGG16", "ResNet18", "ResNet50", "ResNet101", "ResNet152", "ConvNext_base", "ConvNext_tiny", "efficientnet_v2_l", "mobilenet_v2", "MNASNET1_3","efficientnet_b0","resnext50_32x4d","maxvit_t","vit_b_32"], help="_")
+                        choices=["VGG16", "ResNet18", "ResNet50", "ResNet101", "ResNet152", "ConvNext_base", "ConvNext_tiny", "efficientnet_v2_l", "mobilenet_v2", "squeezenet1_1","efficientnet_b0","resnext50_32x4d","maxvit_t","vit_b_32","resnext50_32x4d", "swin_t","SWIN_V2_B", "shufflenet_v2_x2_0", "regnet_y_1_6gf"], help="_")
     parser.add_argument("--fc_output_dim", type=int, default=512,
                         help="Output dimension of final fully connected layer")
     # Training parameters

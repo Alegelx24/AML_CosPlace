@@ -20,11 +20,17 @@ CHANNELS_NUM_IN_LAST_CONV = {
     "ConvNext_tiny": 768,
     "efficientnet_v2_l": 1280,
     "mobilenet_v2" : 3,
-    "MNASNET1_3": 3,
+    "squeezenet1_1": 3,
     "efficientnet_b0": 1280,
     "resnext50_32x4d": 2048,
     "maxvit_t" : 64,
-    "vit_b_32":768
+    "vit_b_32":768,
+    "resnext50_32x4d" : 2048,
+    "swin_t": 768,
+    "SWIN_V2_B": 1024,
+    "shufflenet_v2_x2_0": 976,
+    "regnet_y_1_6gf": 512
+
 }
 
 
@@ -202,7 +208,7 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
         layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
 
     
-    elif backbone_name == "MNASNET1_3":
+    elif backbone_name == "squeezenet1_1":
         for name, child in backbone.named_children():
                 if name == "layer3":  # Freeze layers before conv_3
                     break
@@ -244,6 +250,46 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
                     params.requires_grad = False
         logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
         layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
+
+    elif backbone_name == "resnext50_32x4d":
+        for name, child in backbone.named_children():
+               
+                for params in child.parameters():
+                    params.requires_grad = False
+        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
+        layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
+
+    elif backbone_name == "swin_t":
+        for name, child in backbone.named_children():
+               
+                for params in child.parameters():
+                    params.requires_grad = False
+        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
+        layers = list(backbone.children())[:-2]  
+
+    elif backbone_name == "SWIN_V2_B":
+        for name, child in backbone.named_children():
+               
+                for params in child.parameters():
+                    params.requires_grad = False
+        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
+        layers = list(backbone.children())[:-2]  
+    
+    elif backbone_name == "shufflenet_v2_x2_0":
+        for name, child in backbone.named_children():
+               
+                for params in child.parameters():
+                    params.requires_grad = False
+        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
+        layers = list(backbone.children())[:-2]  
+
+    elif backbone_name == "regnet_y_1_6gf":
+        for name, child in backbone.named_children():
+               
+                for params in child.parameters():
+                    params.requires_grad = False
+        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
+        layers = list(backbone.children())[:-2]  
 
     backbone = torch.nn.Sequential(*layers)
     
