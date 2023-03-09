@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader, Dataset
 RECALL_VALUES = [1, 5, 10, 20]
 
 
-def test(args: Namespace, eval_ds: Dataset, model: torch.nn.Module) -> Tuple[np.ndarray, str]:
+def test(args: Namespace, eval_ds: Dataset, model: torch.nn.Module, num_reranked_predictions=None, ) -> Tuple[np.ndarray, str]:
     """Compute descriptors of the given dataset and compute the recalls."""
     
     model = model.eval()
