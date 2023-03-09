@@ -106,7 +106,7 @@ if __name__ == '__main__' :
                     augmentations.DeviceAgnosticRandomResizedCrop([512, 512],
                                                                 scale=[1-args.random_resized_crop, 1]),
                    augmentations.DeviceAgnosticRandomPerspective(),
-                  augmentations.DeviceAgnosticAdjustGamma(gamma=args.gamma, gain=1.2),
+                   augmentations.DeviceAgnosticAdjustGamma(gamma=args.gamma, gain=1.2),
                     T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                 ])
         else: 
