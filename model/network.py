@@ -92,6 +92,7 @@ class GeoLocalizationNet(nn.Module):
         if attention:
             self.backbone=rsn_a.resnet18(True)
             features_dim=512
+            self.weight_softmax = nn.Linear(512 , 5965).weight
         else:
             self.backbone, features_dim = get_backbone(backbone)
 
@@ -101,7 +102,7 @@ class GeoLocalizationNet(nn.Module):
         
         self.attention = attention
 
-        self.weight_softmax = nn.Linear(512 , 5965).weight
+
 
 
         self.aggregation = nn.Sequential(
