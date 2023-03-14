@@ -49,7 +49,7 @@ if __name__ == '__main__' :
         grl_discriminator = None
 
     #### Model
-    model = network.GeoLocalizationNet(args.backbone, args.fc_output_dim, grl_discriminator)
+    model = network.GeoLocalizationNet(args.backbone, args.fc_output_dim, grl_discriminator, attention=args.attention)
 
     logging.info(f"There are {torch.cuda.device_count()} GPUs and {multiprocessing.cpu_count()} CPUs.")
 

@@ -67,6 +67,10 @@ def parse_arguments(is_training: bool = True):
     #RERANKING
     parser.add_argument("--warping_module", type=bool, default=False, help="_")
 
+    #ATTENTION
+
+    parser.add_argument("--attention", action="store_true", help="_")
+
     
     args = parser.parse_args()
     
