@@ -6,7 +6,7 @@ from torch import nn
 from typing import Tuple
 import torch.nn.functional as F
 import numpy as np
-
+import model.resnet_attention as rsn_a
 
 from model.layers import Flatten, L2Norm, GeM
 
@@ -88,7 +88,12 @@ class GeoLocalizationNet(nn.Module):
         """
         super().__init__()
         assert backbone in CHANNELS_NUM_IN_LAST_CONV, f"backbone must be one of {list(CHANNELS_NUM_IN_LAST_CONV.keys())}"
-        self.backbone, features_dim = get_backbone(backbone)
+        
+        if attention:
+            self.backbone=rsn_a.resnet18(True)
+            features_dim=512
+        else:
+            self.backbone, features_dim = get_backbone(backbone)
 
         self.grl_discriminator=grl_discriminator #NEED TO PASS FEATURES DIM AS PARAMETER?
 
@@ -96,11 +101,9 @@ class GeoLocalizationNet(nn.Module):
         
         self.attention = attention
 
-        self.weight_softmax = nn.Linear(512 , 1000).weight
+        self.weight_softmax = nn.Linear(512 , 5965).weight
 
 
-
-        
         self.aggregation = nn.Sequential(
             L2Norm(),
             GeM(),
@@ -131,12 +134,13 @@ class GeoLocalizationNet(nn.Module):
 
             else:
                 if self.attention:
-                    fc_out, feature_conv, feature_convNBN = self.backbone(input)
+                    fc_out, feature_conv, feature_convNBN = self.backbone(x)
+                    
                     bz, nc, h, w = feature_conv.size()
                     feature_conv_view = feature_conv.view(bz, nc, h * w)
                     probs, idxs = fc_out.sort(1, True)
                     class_idx = idxs[:, 0]
-                    scores = self.weight_softmax[class_idx].to(input.device)
+                    scores = self.weight_softmax[class_idx].to(x.device)
                     cam = torch.bmm(scores.unsqueeze(1), feature_conv_view)
                     attention_map = F.softmax(cam.squeeze(1), dim=1)
                     attention_map = attention_map.view(attention_map.size(0), 1, h, w)
