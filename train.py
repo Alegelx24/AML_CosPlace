@@ -22,9 +22,9 @@ if __name__ == '__main__' :
     from datasets.test_dataset import TestDataset
     from datasets.train_dataset import TrainDataset
     from datasets.grl_dataset import GrlDataset
-    from datasets.warping_dataset import HomographyDataset
+    from warping_model.warping_dataset import HomographyDataset
     from datasets.dataset_qp import DatasetQP
-    import datasets.warping_dataset as WDS
+    import warping_model.warping_dataset as WDS
 
     from torchvision.transforms.functional import hflip
     from torch.utils.data.dataloader import DataLoader
