@@ -58,6 +58,7 @@ def test(args: Namespace, eval_ds: Dataset, model: torch.nn.Module, num_reranked
     ##Re-ranking with geo warp
     if args.warping_module:
         reranked_predictions = predictions.copy()
+        num_reranked_predictions=args.num_reranked_predictions
         with torch.no_grad():
             for num_q in tqdm(range(eval_ds.queries_num), desc="Testing", ncols=100):
                 dot_prods_wqp = np.zeros((num_reranked_predictions))
@@ -70,7 +71,7 @@ def test(args: Namespace, eval_ds: Dataset, model: torch.nn.Module, num_reranked
                     
                     preds = []
                     for i in batch_indexes:
-                        pred_path = eval_ds.gallery_paths[predictions[num_q, i]]
+                        pred_path = eval_ds.database_paths[predictions[num_q, i]]
                         preds.append(warp_dataset.open_image_and_apply_transform(pred_path))
                     preds = torch.stack(preds)
                     
@@ -78,14 +79,14 @@ def test(args: Namespace, eval_ds: Dataset, model: torch.nn.Module, num_reranked
                     warp_backbone="alexnet"
                     #choices for warp_backbone=["alexnet", "vgg16", "resnet50"]
                     warp_pooling = "gem" # or warp_pooling= "netvlad"
-                    kernel_sizes = [7,5,5,5,5,5]         
-                    channels=[225,128,128,64,64,64,64]           
+                    kernel_sizes = [7, 5, 5, 5, 5, 5]         
+                    channels=[225, 128, 128, 64, 64, 64, 64]           
 
-                    features_extractor = warp_network.FeaturesExtractor(warp_backbone, warp_pooling, kernel_sizes)
-                    global_features_dim = warp_dataset.get_output_dim(features_extractor, warp_pooling)
+                    features_extractor = warp_network.FeaturesExtractor(warp_backbone, warp_pooling)
+                   # global_features_dim = warp_dataset.get_output_dim(features_extractor, warp_pooling)
                     homography_regression = warp_network.HomographyRegression(kernel_sizes=kernel_sizes, channels=channels, padding=1)
                     
-                    baseline_path= "warping_model\data\pretrained_baselines\alexnet_gem.pth"
+                    baseline_path= "warping_model/data/pretrained_baselines/alexnet_gem.pth"
                     if baseline_path is not None:
                         state_dict = torch.load(baseline_path)
                         features_extractor.load_state_dict(state_dict)
@@ -94,7 +95,7 @@ def test(args: Namespace, eval_ds: Dataset, model: torch.nn.Module, num_reranked
                         logging.warning("WARNING: --resume_fe is set to None, meaning that the "
                                         "Feature Extractor is not initialized!")
 
-                    home_reg_path= "warping_model\data\trained_homography_regressions\alexnet_gem.pth"  
+                    home_reg_path= "warping_model/data/trained_homography_regressions/alexnet_gem.pth"  
                     if home_reg_path is not None:
                         state_dict = torch.load(home_reg_path)
                         homography_regression.load_state_dict(state_dict)
@@ -104,7 +105,7 @@ def test(args: Namespace, eval_ds: Dataset, model: torch.nn.Module, num_reranked
                                         "Homography Regression is not initialized!")
                     
                     warp_model = warp_network.Network(features_extractor, homography_regression).cuda().eval()
-                    warp_model = torch.nn.DataParallel(model)
+                    warp_model = torch.nn.DataParallel(warp_model)
 
                     warped_pair = warp_dataset.compute_warping(warp_model, query_repeated_twice.cuda(), preds.cuda())
                     q_features = warp_model("features_extractor", [warped_pair[0], "local"])

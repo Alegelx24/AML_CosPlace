@@ -65,7 +65,9 @@ def parse_arguments(is_training: bool = True):
     parser.add_argument("--grl_datasets", type=str, default=None, help="_")
 
     #RERANKING
-    parser.add_argument("--warping_module", type=bool, default=False, help="_")
+    parser.add_argument("--warping_module", type=bool, default=False, help="_") 
+    parser.add_argument("--num_reranked_predictions", type=int, default=5, help="_")
+
 
     #ATTENTION
 
