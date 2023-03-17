@@ -17,6 +17,11 @@ CHANNELS_NUM_IN_LAST_CONV = {
     "ResNet101": 2048,
     "ResNet152": 2048,
     "VGG16": 512,
+
+    #updated backbones
+    "mobilenet_v3_small": 576,
+
+    #old test
     "ConvNext_base": 1024,
     "ConvNext_tiny": 768,
     "efficientnet_v2_l": 1280,
@@ -196,6 +201,8 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
             for p in layer.parameters():
                 p.requires_grad = False
         logging.debug("Train last layers of the VGG-16, freeze the previous ones")
+
+    ###
    
     elif backbone_name == "ConvNext_base":
        for name, child in backbone.named_children():
@@ -225,14 +232,18 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
         logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
         layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
 
-    elif backbone_name == "mobilenet_v2":
-        for name, child in backbone.named_children():
-                if name == "layer3":  # Freeze layers before conv_3
-                    break
-                for params in child.parameters():
-                    params.requires_grad = False
-        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
-        layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
+    elif backbone_name.startswith("mobilenet"):
+        if backbone_name == "mobilenet_v3_small":
+            backbone = torchvision.models.mobilenet_v3_small(weights="IMAGENET1K_V1")
+        elif backbone_name == "mobilenet_v3_large":
+            backbone = torchvision.models.mobilenet_v3_large(weights="IMAGENET1K_V1")
+
+        layers = list(backbone.features.children()) # Remove avg pooling and FC layer
+        # TODO consider to freeze up to layers[:-3]
+        for layer in layers[:-3]: # freeze all the layers except the last two
+            for p in layer.parameters():
+                p.requires_grad = False
+        logging.debug("Train last two layers of MobileNet, freeze the previous ones")
 
     
     elif backbone_name == "squeezenet1_1":
