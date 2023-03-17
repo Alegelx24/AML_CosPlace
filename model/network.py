@@ -20,7 +20,12 @@ CHANNELS_NUM_IN_LAST_CONV = {
 
     #updated backbones
     "mobilenet_v3_small": 576,
-
+    "efficientnet_b0": 1280,
+    "efficientnet_b1": 1280,
+    "efficientnet_b2": 1408,
+    "efficientnet_v2_s": 1280,
+    "mobilenet_v3_small": 576,
+    "mobilenet_v3_large": 960,
     #old test
     "ConvNext_base": 1024,
     "ConvNext_tiny": 768,
@@ -202,7 +207,42 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
                 p.requires_grad = False
         logging.debug("Train last layers of the VGG-16, freeze the previous ones")
 
-    ###
+    ### ROBA NUOVA#######################################
+
+    elif backbone_name.startswith("efficientnet"):
+        if backbone_name == "efficientnet_b0":
+            backbone = torchvision.models.efficientnet_b0(weights="IMAGENET1K_V1")
+        elif backbone_name == "efficientnet_b1":
+            backbone = torchvision.models.efficientnet_b1(weights="IMAGENET1K_V1")
+        elif backbone_name == "efficientnet_b2":
+            backbone = torchvision.models.efficientnet_b2(weights="IMAGENET1K_V1")
+        elif backbone_name == "efficientnet_v2_s":
+            backbone = torchvision.models.efficientnet_v2_s(weights="IMAGENET1K_V1")
+        
+        layers = list(backbone.features.children()) # Remove avg pooling and FC layer
+        for layer in layers[:-2]: # freeze all the layers except the last two
+            for p in layer.parameters():
+                p.requires_grad = False
+        logging.debug("Train last two layers of EfficientNet, freeze the previous ones")
+
+
+
+    elif backbone_name.startswith("mobilenet"):
+            if backbone_name == "mobilenet_v3_small":
+                backbone = torchvision.models.mobilenet_v3_small(weights="IMAGENET1K_V1")
+            elif backbone_name == "mobilenet_v3_large":
+                backbone = torchvision.models.mobilenet_v3_large(weights="IMAGENET1K_V1")
+
+            layers = list(backbone.features.children()) # Remove avg pooling and FC layer
+            # TODO consider to freeze up to layers[:-3]
+            for layer in layers[:-3]: # freeze all the layers except the last two
+                for p in layer.parameters():
+                    p.requires_grad = False
+            logging.debug("Train last two layers of MobileNet, freeze the previous ones")
+
+
+
+    ####################################################
    
     elif backbone_name == "ConvNext_base":
        for name, child in backbone.named_children():
@@ -232,18 +272,7 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
         logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
         layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
 
-    elif backbone_name.startswith("mobilenet"):
-        if backbone_name == "mobilenet_v3_small":
-            backbone = torchvision.models.mobilenet_v3_small(weights="IMAGENET1K_V1")
-        elif backbone_name == "mobilenet_v3_large":
-            backbone = torchvision.models.mobilenet_v3_large(weights="IMAGENET1K_V1")
-
-        layers = list(backbone.features.children()) # Remove avg pooling and FC layer
-        # TODO consider to freeze up to layers[:-3]
-        for layer in layers[:-3]: # freeze all the layers except the last two
-            for p in layer.parameters():
-                p.requires_grad = False
-        logging.debug("Train last two layers of MobileNet, freeze the previous ones")
+    
 
     
     elif backbone_name == "squeezenet1_1":
