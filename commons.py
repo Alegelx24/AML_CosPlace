@@ -8,6 +8,15 @@ import traceback
 import numpy as np
 
 
+def get_output_dim(model, pooling_type="gem"):
+    #Used by geo_warp_network
+    """Dinamically compute the output size of a model.
+    """
+    output_dim = model(torch.ones([2, 3, 224, 224])).shape[1]
+    if pooling_type == "netvlad":
+        output_dim *= 64  # NetVLAD layer has 64x bigger output dimensions
+    return output_dim
+
 class InfiniteDataLoader(torch.utils.data.DataLoader):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
