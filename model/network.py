@@ -248,7 +248,7 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
     
     elif backbone_name.startswith("regnet_y_16gf"):
         
-        layers = list(backbone.children())[:-2] # Remove avg pooling and FC layer
+        layers = list(backbone.children())[:-3] # Remove avg pooling and FC layer
         for layer in layers[:-1]: # freeze all the layers except the last one
             for p in layer.parameters():
                 p.requires_grad = False
