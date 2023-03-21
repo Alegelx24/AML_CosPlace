@@ -29,6 +29,7 @@ CHANNELS_NUM_IN_LAST_CONV = {
     "maxvit_t" : 64,
     "regnet_y_1_6gf":888,#too slow
     "convnext_small" : 768,
+    "regnet_y_16gf":888,
 
     #old test
     "ConvNext_base": 1024,
@@ -244,6 +245,15 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
             for p in layer.parameters():
                 p.requires_grad = False
         logging.debug("Train last two layers of RegNet, freeze the previous ones")
+    
+    elif backbone_name.startswith("regnet_y_16gf"):
+        
+        layers = list(backbone.children())[:-3] # Remove avg pooling and FC layer
+        for layer in layers[:-1]: # freeze all the layers except the last one
+            for p in layer.parameters():
+                p.requires_grad = False
+        logging.debug("Train last two layers of RegNet, freeze the previous ones")
+
   
     elif backbone_name.startswith("convnext_small"):
         
