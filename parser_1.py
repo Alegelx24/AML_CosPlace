@@ -61,13 +61,18 @@ def parse_arguments(is_training: bool = True):
     parser.add_argument("--save_dir", type=str, default="default",
                         help="name of directory on which to save the logs, under logs/save_dir")
     #DOMAIN ADAPTATION
-    parser.add_argument("--grl", type=bool, default=False, help="_")
+    parser.add_argument("--grl", action="store_true", help="_")
     parser.add_argument("--dataset_root", type=str, default=None, help="_")
     parser.add_argument("--grl_datasets", type=str, default=None, help="_")
 
     #RERANKING
-    parser.add_argument("--warping_module", type=bool, default=False, help="_") 
+    parser.add_argument("--warping_module",action="store_true", help="_") 
     parser.add_argument("--num_reranked_predictions", type=int, default=5, help="_")
+
+    #FDA
+
+    parser.add_argument("--fda", action="store_true",help="_") 
+    parser.add_argument("--fda_weight", type=float, default=0.01,help="_") 
 
 
     #ATTENTION
