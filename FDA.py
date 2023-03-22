@@ -55,8 +55,8 @@ def FDA_source_to_target_np( src_img, trg_img, L=0.1 ):
 
 def FDA_transform(source_img, target_img, weight):
 
-    im_trg  = Image.open(source_img).convert('RGB')
-    im_src = Image.open(target_img).convert('RGB')
+    im_src  = Image.open(source_img).convert('RGB')
+    im_trg = Image.open(target_img).convert('RGB')
 
     im_src = im_src.resize( (640,480), Image.BICUBIC )
     im_trg = im_trg.resize( (640,480), Image.BICUBIC )
