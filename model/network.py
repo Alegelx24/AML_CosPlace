@@ -220,13 +220,20 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
                 p.requires_grad = False
         logging.debug("Train last two layers of EfficientNet, freeze the previous ones")
 
-
-
-    elif backbone_name.startswith("mobilenet"):
+    elif backbone_name.startswith("mobilenet_v3_small"):
 
         layers = list(backbone.features.children()) # Remove avg pooling and FC layer
         
-        for layer in layers[:-3]: # freeze all the layers except the last two
+        for layer in layers[:-2]: # freeze all the layers except the last two
+            for p in layer.parameters():
+                p.requires_grad = False
+        logging.debug("Train last two layers of MobileNet, freeze the previous ones")
+
+    elif backbone_name.startswith("mobilenet_v3_large"):
+
+        layers = list(backbone.features.children()) # Remove avg pooling and FC layer
+        
+        for layer in layers[:-2]: # freeze all the layers except the last two
             for p in layer.parameters():
                 p.requires_grad = False
         logging.debug("Train last two layers of MobileNet, freeze the previous ones")
@@ -248,7 +255,7 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
     
     elif backbone_name.startswith("regnet_y_16gf"):
         
-        layers = list(backbone.children())[:-3] # Remove avg pooling and FC layer
+        layers = list(backbone.children())[:-2] # Remove avg pooling and FC layer
         for layer in layers[:-1]: # freeze all the layers except the last one
             for p in layer.parameters():
                 p.requires_grad = False
