@@ -239,8 +239,8 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
         logging.debug("Train last two layers of MobileNet, freeze the previous ones")
 
     elif backbone_name.startswith("maxvit_t"): ##NOT WORKING
-        layers = list(backbone.children())[:-1] # Remove avg pooling and FC layer
-        for x in layers[-1:]:
+        layers = list(backbone.children())[:-2] # Remove avg pooling and FC layer
+        for x in layers:
             for p in x.parameters():
                 p.requires_grad = False # freeze all the layers except the last three blocks
         logging.debug("Train last three layers of Swin, freeze the previous ones")
