@@ -78,11 +78,11 @@ def FDA_database_transform(database_path, queries_path, output_dir, weight= 0.01
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
     
-    for filename in os.listdir(database_path):
-        query_index=int(random.uniform(0,104))
-        src_in_trg = FDA_transform(database_path +"/"+ filename, queries_path +"/"+queries_list[query_index], weight )
-        
-        imageio.imwrite(output_dir+"/"+filename ,src_in_trg)
+        for filename in os.listdir(database_path):
+            query_index=int(random.uniform(0,104))
+            src_in_trg = FDA_transform(database_path +"/"+ filename, queries_path +"/"+queries_list[query_index], weight )
+            
+            imageio.imwrite(output_dir+"/"+filename ,src_in_trg)
 
 
 
