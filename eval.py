@@ -49,8 +49,8 @@ if __name__ == '__main__':
         fda.FDA_database_transform(args.test_set_folder+"/database",args.test_set_folder+"/queries_v1",args.test_set_folder+"/database_trasformed", args.fda_weight)
         test_ds = TestDataset(args.test_set_folder,database_folder="database_trasformed", queries_folder="queries_v1",
                                 positive_dist_threshold=args.positive_dist_threshold)
-    
-    test_ds = TestDataset(args.test_set_folder, queries_folder="queries_v1",
+    else:
+        test_ds = TestDataset(args.test_set_folder, queries_folder="queries_v1",
                         positive_dist_threshold=args.positive_dist_threshold)
 
     recalls, recalls_str = test.test(args, test_ds, model)
