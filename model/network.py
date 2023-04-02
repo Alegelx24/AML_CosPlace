@@ -21,15 +21,18 @@ CHANNELS_NUM_IN_LAST_CONV = {
     #updated backbones
     "mobilenet_v3_small": 576,#TESTED
     "efficientnet_b0": 1280,
-    "efficientnet_b1": 1280,
-    "efficientnet_b2": 1408,
+    "efficientnet_b3": 1408,
     "efficientnet_v2_s": 1280,#TESTED
-    "mobilenet_v3_small": 576,
+    "mobilenet_v3_small": 576,#TESTED
     "mobilenet_v3_large": 960,
-    "maxvit_t" : 64,
-    "regnet_y_1_6gf":888,#too slow
-    "convnext_small" : 768,
+    "maxvit_t" : 64,#TESTED
+    "regnet_y_1_6gf":888,#TESTED
+    "convnext_small" : 768,#TESTED
     "regnet_y_16gf":888,
+    "swin_t": 768,
+    "swin_v2_t": 768,
+
+
 
     #old test
     "ConvNext_base": 1024,
@@ -41,7 +44,6 @@ CHANNELS_NUM_IN_LAST_CONV = {
     "resnext50_32x4d": 2048,
     "vit_b_32":768,
     "resnext50_32x4d" : 2048,
-    "swin_t": 768,
     "SWIN_V2_B": 1024,
     "shufflenet_v2_x2_0": 976,
 }
@@ -212,7 +214,23 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
 
     ### ROBA NUOVA#######################################
 
-    elif backbone_name.startswith("efficientnet"):
+    elif backbone_name.startswith("efficientnet_v2_s"):
+        
+        layers = list(backbone.features.children()) # Remove avg pooling and FC layer
+        for layer in layers[:-2]: # freeze all the layers except the last two
+            for p in layer.parameters():
+                p.requires_grad = False
+        logging.debug("Train last two layers of EfficientNet, freeze the previous ones")
+
+    elif backbone_name.startswith("efficientnet_b3"):
+        
+        layers = list(backbone.features.children()) # Remove avg pooling and FC layer
+        for layer in layers[:-2]: # freeze all the layers except the last two
+            for p in layer.parameters():
+                p.requires_grad = False
+        logging.debug("Train last two layers of EfficientNet, freeze the previous ones")
+
+    elif backbone_name.startswith("efficientnet_b0"):
         
         layers = list(backbone.features.children()) # Remove avg pooling and FC layer
         for layer in layers[:-2]: # freeze all the layers except the last two
@@ -261,7 +279,6 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
                 p.requires_grad = False
         logging.debug("Train last two layers of RegNet, freeze the previous ones")
 
-  
     elif backbone_name.startswith("convnext_small"):
         
         layers = list(backbone.features.children()) # Remove avg pooling and FC layer
@@ -269,6 +286,22 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
             for p in layer.parameters():
                 p.requires_grad = False
         logging.debug("Train last two layers of EfficientNet, freeze the previous ones")
+
+    elif backbone_name.startswith("swin_t"):
+
+        layers = list(backbone.children())[:-3] # Remove avg pooling and FC layer
+        for x in layers[0][:-1]:
+            for p in x.parameters():
+                p.requires_grad = False # freeze all the layers except the last three blocks
+        logging.debug("Train last three layers of Swin, freeze the previous ones")
+
+    elif backbone_name.startswith("swin_v2_t"):
+
+        layers = list(backbone.children())[:-3] # Remove avg pooling and FC layer
+        for x in layers[0][:-1]:
+            for p in x.parameters():
+                p.requires_grad = False # freeze all the layers except the last three blocks
+        logging.debug("Train last three layers of Swin, freeze the previous ones")
 
 
     ####################################################
