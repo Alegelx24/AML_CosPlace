@@ -14,8 +14,8 @@ def parse_arguments(is_training: bool = True):
     parser.add_argument("--min_images_per_class", type=int, default=10, help="_")
     # Model parameters
     parser.add_argument("--backbone", type=str, default="ResNet18",
-                        choices=["VGG16", "ResNet18", "ResNet50", "ResNet101", "ResNet152","mobilenet_v3_small","efficientnet_v2_s",
-                                  "ConvNext_base", "ConvNext_tiny", "efficientnet_v2_l",  "squeezenet1_1","efficientnet_b0","resnext50_32x4d","maxvit_t","vit_b_32","resnext50_32x4d", "swin_t","SWIN_V2_B", "shufflenet_v2_x2_0", "regnet_y_1_6gf"], help="_")
+                        choices=["VGG16", "ResNet18", "ResNet50", "ResNet101", "ResNet152","mobilenet_v3_small","mobilenet_v3_large","efficientnet_v2_s","efficientnet_b0","efficientnet_b3","maxvit_t","regnet_y_1_6gf", "convnext_small", "swin_t","swin_v2_t",
+                                  "ConvNext_base", "ConvNext_tiny", "efficientnet_v2_l",  "squeezenet1_1","resnext50_32x4d","vit_b_32","resnext50_32x4d","SWIN_V2_B", "shufflenet_v2_x2_0", "regnet_y_1_6gf"], help="_")
     parser.add_argument("--fc_output_dim", type=int, default=512,
                         help="Output dimension of final fully connected layer")
     # Training parameters
@@ -61,17 +61,21 @@ def parse_arguments(is_training: bool = True):
     parser.add_argument("--save_dir", type=str, default="default",
                         help="name of directory on which to save the logs, under logs/save_dir")
     #DOMAIN ADAPTATION
-    parser.add_argument("--grl", type=bool, default=False, help="_")
+    parser.add_argument("--grl", action="store_true", help="_")
     parser.add_argument("--dataset_root", type=str, default=None, help="_")
     parser.add_argument("--grl_datasets", type=str, default=None, help="_")
 
     #RERANKING
-    parser.add_argument("--warping_module", type=bool, default=False, help="_") 
+    parser.add_argument("--warping_module",action="store_true", help="_") 
     parser.add_argument("--num_reranked_predictions", type=int, default=5, help="_")
 
     #MODEL SOUPE
     parser.add_argument("--model_soupe_greedy", type=bool, default=False, help="_") 
     parser.add_argument("--model_soupe_uniform", type=bool, default=False, help="_") 
+    #FDA
+
+    parser.add_argument("--fda", action="store_true",help="_") 
+    parser.add_argument("--fda_weight", type=float, default=0.01,help="_") 
 
 
     #ATTENTION
