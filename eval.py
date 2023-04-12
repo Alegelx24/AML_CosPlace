@@ -12,6 +12,7 @@ if __name__ == '__main__':
     from model import network
     from datasets.test_dataset import TestDataset
     import model_soup
+    import os
 
 
     torch.backends.cudnn.benchmark = True  # Provides a speedup
@@ -56,11 +57,17 @@ if __name__ == '__main__':
     
     if args.model_soupe_greedy:
         state_dicts = model_soup.load_models()
+        args.val_set_folder = os.path.join(args.dataset_folder, "val")
+        if not os.path.exists(args.val_set_folder):
+            raise FileNotFoundError(f"Folder {args.val_set_folder} does not exist")
         val_ds = TestDataset(args.val_set_folder, positive_dist_threshold=args.positive_dist_threshold)
 
+        val_results = []
+
         for i in range(len(state_dicts)):
-            val_results = []
-            val_results.append(test.test(args, val_ds, model)[0][0])
+          recalls,_ = test.test(args, val_ds, model)
+          r1=recalls[0]/100
+          val_results.append(r1)
 
         ranked_candidates = [i for i in range(len(state_dicts))]
         ranked_candidates.sort(key=lambda x: -val_results[x])
@@ -74,7 +81,7 @@ if __name__ == '__main__':
             alphal = [0 for i in range(len(state_dicts))]
             for j in ingredient_indices:
                 alphal[j] = 1 / len(ingredient_indices)
-            model = model_soup.get_model(state_dicts, alphal)
+            model = model_soup.get_model_soup(model, state_dicts, alphal)
 
     if args.fda:
         fda.FDA_database_transform(args.test_set_folder+"/database",args.test_set_folder+"/queries_v1",args.test_set_folder+"/database_trasformed", args.fda_weight)
@@ -84,5 +91,5 @@ if __name__ == '__main__':
         test_ds = TestDataset(args.test_set_folder, queries_folder="queries_v1",
                         positive_dist_threshold=args.positive_dist_threshold)
 
-    recalls, recalls_str = test.test(args, test_ds, model, val_ds=None)
+    recalls, recalls_str = test.test(args, test_ds, model)
     logging.info(f"{test_ds}: {recalls_str}")
