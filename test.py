@@ -131,4 +131,7 @@ def test(args: Namespace, eval_ds: Dataset, model: torch.nn.Module, num_reranked
     # Divide by queries_num and multiply by 100, so the recalls are in percentages
     recalls = recalls / eval_ds.queries_num * 100
     recalls_str = ", ".join([f"R@{val}: {rec:.1f}" for val, rec in zip(RECALL_VALUES, recalls)])
+    print("----------------recalls: ---------------")
+    print(recalls)
+    print("----------------------------------------")
     return recalls, recalls_str

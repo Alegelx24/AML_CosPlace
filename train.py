@@ -344,22 +344,7 @@ if __name__ == '__main__' :
 
     #### Test best model on test set v1
 
-    
-    '''
-    if args.model_soupe_uniform:
-        state_dicts = model_soup.load_models()
-        model = model_soup.get_model_soup()
-    else:
-        if args.model_soupe_greedy:
-            #.....
-            
-        else:
-            best_model_state_dict = torch.load(f"{output_folder}/best_model.pth")
-            model.load_state_dict(best_model_state_dict)
-    '''
- 
-
-    if args.warping_module:
+    if args.warping_module: #CANCELLARE?
         homography_regression = homography_regression.eval()
         test_baseline_recalls, test_baseline_recalls_pretty_str, test_baseline_predictions, _, _ = \
         util.compute_features(test_ds, model, args.fc_output_dim)

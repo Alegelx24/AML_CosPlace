@@ -10,6 +10,8 @@ if __name__ == '__main__':
     import commons
     from model import network
     from datasets.test_dataset import TestDataset
+    import model_soup
+
 
     torch.backends.cudnn.benchmark = True  # Provides a speedup
 
@@ -44,8 +46,37 @@ if __name__ == '__main__':
 
     model = model.to(args.device)
 
+    
+    if args.model_soupe_uniform:
+        print("loading state dicts for model soup uniform...")
+        state_dicts = model_soup.load_models()
+        alphal = [1 / len(state_dicts) for i in range(len(state_dicts))]
+        model = model_soup.get_model_soup(model, state_dicts, alphal)
+    
+    if args.model_soupe_greedy:
+        state_dicts = model_soup.load_models()
+        val_ds = TestDataset(args.val_set_folder, positive_dist_threshold=args.positive_dist_threshold)
+
+        for i in range(len(state_dicts)):
+            val_results = []
+            val_results.append(test.test(args, val_ds, model)[0][0])
+
+        ranked_candidates = [i for i in range(len(state_dicts))]
+        ranked_candidates.sort(key=lambda x: -val_results[x])
+
+        current_best = val_results[ranked_candidates[0]]
+        best_ingredients = ranked_candidates[:1]
+        for i in range(1, len(state_dicts)):
+            # add current index to the ingredients
+            ingredient_indices = best_ingredients \
+                + [ranked_candidates[i]]
+            alphal = [0 for i in range(len(state_dicts))]
+            for j in ingredient_indices:
+                alphal[j] = 1 / len(ingredient_indices)
+            model = model_soup.get_model(state_dicts, alphal)
+
     test_ds = TestDataset(args.test_set_folder, queries_folder="queries_v1",
                         positive_dist_threshold=args.positive_dist_threshold)
 
-    recalls, recalls_str = test.test(args, test_ds, model)
+    recalls, recalls_str = test.test(args, test_ds, model, val_ds=None)
     logging.info(f"{test_ds}: {recalls_str}")
