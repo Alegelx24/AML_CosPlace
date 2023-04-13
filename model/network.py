@@ -21,7 +21,7 @@ CHANNELS_NUM_IN_LAST_CONV = {
     #updated backbones
     "mobilenet_v3_small": 576,#TESTED
     "efficientnet_b0": 1280,
-    "efficientnet_b3": 1408,
+    "efficientnet_b3": 1536,
     "efficientnet_v2_s": 1280,#TESTED
     "mobilenet_v3_small": 576,#TESTED
     "mobilenet_v3_large": 960,
