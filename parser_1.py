@@ -69,6 +69,9 @@ def parse_arguments(is_training: bool = True):
     parser.add_argument("--warping_module",action="store_true", help="_") 
     parser.add_argument("--num_reranked_predictions", type=int, default=5, help="_")
 
+    #MODEL SOUPE
+    parser.add_argument("--model_soupe_greedy", type=bool, default=False, help="_") 
+    parser.add_argument("--model_soupe_uniform", type=bool, default=False, help="_") 
     #FDA
 
     parser.add_argument("--fda", action="store_true",help="_") 
