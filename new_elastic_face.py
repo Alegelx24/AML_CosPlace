@@ -56,7 +56,7 @@ class ElasticArcFace(nn.Module):
 
 
 class ElasticCosFace(nn.Module):
-    def __init__(self, in_features, out_features, s=64.0, m=0.35,std=0.0125, plus=False):
+    def __init__(self, in_features, out_features, s=30.0, m=0.40,std=0.0125, plus=False):
         super(ElasticCosFace, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -86,3 +86,6 @@ class ElasticCosFace(nn.Module):
         cos_theta[index] -= m_hot
         ret = cos_theta * self.s
         return ret
+
+
+

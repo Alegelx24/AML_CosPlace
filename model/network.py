@@ -20,17 +20,17 @@ CHANNELS_NUM_IN_LAST_CONV = {
 
     #updated backbones
     "mobilenet_v3_small": 576,#TESTED
-    "efficientnet_b0": 1280,
+    "efficientnet_b0": 1280,#TESTED
     "efficientnet_b3": 1536,
     "efficientnet_v2_s": 1280,#TESTED
     "mobilenet_v3_small": 576,#TESTED
-    "mobilenet_v3_large": 960,
+    "mobilenet_v3_large": 960,#TESTED
     "maxvit_t" : 64,#TESTED
     "regnet_y_1_6gf":888,#TESTED
     "convnext_small" : 768,#TESTED
     "regnet_y_16gf":888,
     "swin_t": 768,
-    "swin_v2_t": 768,
+    "swin_v2_t": 768,#TESTED
 
 
 
