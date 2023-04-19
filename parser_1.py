@@ -69,18 +69,22 @@ def parse_arguments(is_training: bool = True):
     parser.add_argument("--warping_module",action="store_true", help="_") 
     parser.add_argument("--num_reranked_predictions", type=int, default=5, help="_")
 
-    #MODEL SOUPE
+    #MODEL SOUP
     parser.add_argument("--model_soupe_greedy", type=bool, default=False, help="_") 
     parser.add_argument("--model_soupe_uniform", type=bool, default=False, help="_") 
+    
     #FDA
-
     parser.add_argument("--fda", action="store_true",help="_") 
     parser.add_argument("--fda_weight", type=float, default=0.01,help="_") 
 
 
-    #ATTENTION
+    #LOSSES
+    parser.add_argument("--loss", type=str, default="cosface",
+                        choices=["cosface","arcface", "sphereface", "elastic_face", "new_elasticface"], help="_")
 
+    #ATTENTION
     parser.add_argument("--attention", action="store_true", help="_")
+
 
     
     args = parser.parse_args()

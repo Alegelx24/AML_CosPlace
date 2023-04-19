@@ -16,6 +16,7 @@ if __name__ == '__main__' :
     import cosface_loss_ArcFace
     import cosface_loss_SphereFace
     import elastic_face
+    import new_elastic_face
     import model_soup
     import GradientReversalLayer as GRL
     import augmentations
@@ -114,11 +115,17 @@ if __name__ == '__main__' :
     groups = [TrainDataset(args, args.train_set_folder, M=args.M, alpha=args.alpha, N=args.N, L=args.L,
                         current_group=n, min_images_per_class=args.min_images_per_class) for n in range(args.groups_num)]
     # Each group has its own classifier, which depends on the number of classes in the group
-    classifiers = [cosface_loss.MarginCosineProduct(args.fc_output_dim, len(group)) for group in groups]
-    #classifiers = [elastic_face.ElasticArcFace(args.fc_output_dim, len(group)) for group in groups]
+    if args.loss =="cosface":
+        classifiers = [cosface_loss.MarginCosineProduct(args.fc_output_dim, len(group)) for group in groups]
+    elif args.loss =="arcface":
+        classifiers = [cosface_loss_ArcFace.MarginCosineProduct(args.fc_output_dim, len(group)) for group in groups]
+    elif args.loss =="sphereface":
+        classifiers = [cosface_loss_SphereFace.MarginCosineProduct(args.fc_output_dim, len(group)) for group in groups]
+    elif args.loss =="elasticface":
+        classifiers = [elastic_face.ElasticCosFace(args.fc_output_dim, len(group)) for group in groups]
+    elif args.loss =="new_elasticface":
+        classifiers = [new_elastic_face.ElasticCosFace(args.fc_output_dim, len(group)) for group in groups]
 
-    #classifiers = [cosface_loss_SphereFace.MarginCosineProduct(args.fc_output_dim, len(group)) for group in groups]
-    #classifiers = [cosface_loss_ArcFace.MarginCosineProduct(args.fc_output_dim, len(group)) for group in groups]
     classifiers_optimizers = [torch.optim.Adam(classifier.parameters(), lr=args.classifiers_lr) for classifier in classifiers]
 
     logging.info(f"Using {len(groups)} groups")
