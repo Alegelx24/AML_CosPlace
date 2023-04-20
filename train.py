@@ -220,7 +220,9 @@ if __name__ == '__main__' :
                                                 pin_memory=(args.device == "cuda"), drop_last=True)
         
         dataloader_iterator = iter(dataloader)
-        grl_dataloader_iterator=iter(grl_dataloader)
+        
+        if args.grl:
+            grl_dataloader_iterator=iter(grl_dataloader)
 
 
         if args.warping_module:
