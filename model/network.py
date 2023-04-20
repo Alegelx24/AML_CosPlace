@@ -7,6 +7,7 @@ from typing import Tuple
 import torch.nn.functional as F
 import numpy as np
 import model.resnet_attention as rsn_a
+import GradientReversalLayer as GRL
 
 from model.layers import Flatten, L2Norm, GeM
 
@@ -111,7 +112,7 @@ class GeoLocalizationNet(nn.Module):
         else:
             self.backbone, features_dim = get_backbone(backbone)
 
-        self.grl_discriminator=grl_discriminator #NEED TO PASS FEATURES DIM AS PARAMETER?
+        self.grl_discriminator=GRL.get_discriminator(features_dim, 1) #NEED TO PASS FEATURES DIM AS PARAMETER?
 
         self.homography_regression=homography_regression
         
