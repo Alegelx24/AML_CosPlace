@@ -220,6 +220,7 @@ if __name__ == '__main__' :
                                                 pin_memory=(args.device == "cuda"), drop_last=True)
         
         dataloader_iterator = iter(dataloader)
+        grl_dataloader_iterator=iter(grl_dataloader)
 
 
         if args.warping_module:
@@ -244,6 +245,16 @@ if __name__ == '__main__' :
                 output = classifiers[current_group_num](descriptors, targets)
                 loss = criterion(output, targets)
                 loss.backward()
+                
+                if args.grl:
+                    grl_images, labels = next(grl_dataloader_iterator)
+                    grl_images, labels = grl_images.to(args.device), labels.to(args.device)
+                    outputs = model(grl_images, grl=True)
+                    loss_grl = cross_entropy_loss(outputs, labels)
+                    (loss_grl *grl_loss_weight ).backward()
+                    epoch_grl_loss += loss_grl.item()
+                    del grl_images, labels, outputs, loss_grl
+
                 epoch_losses = np.append(epoch_losses, loss.item())
                 del loss, output, images
                 model_optimizer.step()
@@ -253,6 +264,16 @@ if __name__ == '__main__' :
                     descriptors = model(images)
                     output = classifiers[current_group_num](descriptors, targets)
                     loss = criterion(output, targets)
+
+                    if args.grl:
+                        grl_images, labels = next(grl_dataloader_iterator)
+                        grl_images, labels = grl_images.to(args.device), labels.to(args.device)
+                        outputs = model(grl_images, grl=True)
+                        loss_grl = cross_entropy_loss(outputs, labels)
+                        (loss_grl *grl_loss_weight ).backward()
+                        epoch_grl_loss += loss_grl.item()
+                        del grl_images, labels, outputs, loss_grl
+                
                 scaler.scale(loss).backward()
                 epoch_losses = np.append(epoch_losses, loss.item())
                 del loss, output, images
@@ -261,13 +282,13 @@ if __name__ == '__main__' :
                 scaler.update()
 
             if args.grl:
-                images, labels = next(iter(grl_dataloader))
-                images, labels = images.to(args.device), labels.to(args.device)
-                outputs = model(images, grl=True)
+                grl_images, labels = next(grl_dataloader_iterator)
+                grl_images, labels = grl_images.to(args.device), labels.to(args.device)
+                outputs = model(grl_images, grl=True)
                 loss_grl = cross_entropy_loss(outputs, labels)
                 (loss_grl *grl_loss_weight ).backward()
                 epoch_grl_loss += loss_grl.item()
-                del images, labels, outputs, loss_grl
+                del grl_images, labels, outputs, loss_grl
 
             if args.warping_module:
                 warped_img_1, warped_img_2, warped_intersection_points_1, warped_intersection_points_2 = to_cuda(next(dataloader_iterator))

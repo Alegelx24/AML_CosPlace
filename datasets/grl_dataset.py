@@ -26,6 +26,7 @@ class GrlDataset(torch.utils.data.Dataset):
                 raise Exception(f"Class {dataset_path} has 0 images, that's a problem!!!")
         self.transform = GRL.grl_transform
         self.length = length
+
     def __getitem__(self, index):
         num_class = index % self.num_classes
         images_of_class = self.images_paths[num_class]
@@ -33,5 +34,6 @@ class GrlDataset(torch.utils.data.Dataset):
         image_path = random.choice(images_of_class)
         tensor = self.transform(Image.open(image_path).convert("RGB"))
         return tensor, num_class
+    
     def __len__(self):
         return self.length
