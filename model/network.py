@@ -112,7 +112,9 @@ class GeoLocalizationNet(nn.Module):
         else:
             self.backbone, features_dim = get_backbone(backbone)
 
-        self.grl_discriminator=GRL.get_discriminator(features_dim, 1) #NEED TO PASS FEATURES DIM AS PARAMETER?
+        
+        self.grl_discriminator=grl_discriminator
+        # self.grl_discriminator=GRL.get_discriminator(features_dim, 1) #NEED TO PASS FEATURES DIM AS PARAMETER?
 
         self.homography_regression=homography_regression
         
