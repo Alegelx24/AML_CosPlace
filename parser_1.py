@@ -80,7 +80,7 @@ def parse_arguments(is_training: bool = True):
 
     #LOSSES
     parser.add_argument("--loss", type=str, default="cosface",
-                        choices=["cosface","arcface", "sphereface", "elastic_face", "new_elasticface"], help="_")
+                        choices=["cosface","arcface", "sphereface", "elasticface", "new_elasticface"], help="_")
 
     #ATTENTION
     parser.add_argument("--attention", action="store_true", help="_")
