@@ -38,7 +38,7 @@ class DeviceAgnosticRandomResizedCrop(T.RandomResizedCrop):
     
 class DeviceAgnosticRandomPerspective(T.RandomPerspective):
     def __init__(self, distortion_scale: float=0.3, p: float=0.3):
-        """This is the same as T.RandomResizedCrop but it only accepts batches of images and works on GPU"""
+        """This is the same as T.RandomResizedPerspective but it only accepts batches of images and works on GPU"""
         super().__init__(distortion_scale=distortion_scale, p=p)
     
     def forward(self, images: torch.Tensor) -> torch.Tensor:
