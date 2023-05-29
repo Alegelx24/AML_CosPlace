@@ -13,8 +13,8 @@ if __name__ == '__main__' :
     import parser_1
     import commons
     import cosface_loss
-    import cosface_loss_ArcFace
-    import cosface_loss_SphereFace
+    import arcface_loss
+    import sphereface_loss
     import elastic_face
     import new_elastic_face
     import model_soup
@@ -118,9 +118,9 @@ if __name__ == '__main__' :
     if args.loss =="cosface":
         classifiers = [cosface_loss.MarginCosineProduct(args.fc_output_dim, len(group)) for group in groups]
     elif args.loss =="arcface":
-        classifiers = [cosface_loss_ArcFace.MarginCosineProduct(args.fc_output_dim, len(group)) for group in groups]
+        classifiers = [arcface_loss.ArcFace(args.fc_output_dim, len(group)) for group in groups]
     elif args.loss =="sphereface":
-        classifiers = [cosface_loss_SphereFace.MarginCosineProduct(args.fc_output_dim, len(group)) for group in groups]
+        classifiers = [sphereface_loss.MarginCosineProduct(args.fc_output_dim, len(group)) for group in groups]
     elif args.loss =="elasticface":
         classifiers = [elastic_face.ElasticCosFace(args.fc_output_dim, len(group)) for group in groups]
     elif args.loss =="new_elasticface":
@@ -176,7 +176,7 @@ if __name__ == '__main__' :
                                                             hue=args.hue),
                     augmentations.DeviceAgnosticRandomResizedCrop([512, 512],
                                                                 scale=[1-args.random_resized_crop, 1]),
-                   augmentations.DeviceAgnosticRandomPerspective(),
+                  # augmentations.DeviceAgnosticRandomPerspective(),
                    augmentations.DeviceAgnosticAdjustGamma(gamma=args.gamma, gain=1.2),
                     T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                 ])
