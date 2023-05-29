@@ -120,7 +120,7 @@ if __name__ == '__main__' :
     elif args.loss =="arcface":
         classifiers = [arcface_loss.ArcFace(args.fc_output_dim, len(group)) for group in groups]
     elif args.loss =="sphereface":
-        classifiers = [sphereface_loss.MarginCosineProduct(args.fc_output_dim, len(group)) for group in groups]
+        classifiers = [sphereface_loss.SphereFace(args.fc_output_dim, len(group)) for group in groups]
     elif args.loss =="elasticface":
         classifiers = [elastic_face.ElasticCosFace(args.fc_output_dim, len(group)) for group in groups]
     elif args.loss =="new_elasticface":
