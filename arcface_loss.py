@@ -1,6 +1,3 @@
-
-# Based on https://github.com/MuggleWang/CosFace_pytorch/blob/master/layer.py
-
 import torch
 import torch.nn as nn
 from torch.nn import Parameter
