@@ -18,34 +18,18 @@ CHANNELS_NUM_IN_LAST_CONV = {
     "ResNet152": 2048,
     "VGG16": 512,
 
-    #updated backbones
     "mobilenet_v3_small": 576,#TESTED
     "efficientnet_b0": 1280,#TESTED
     "efficientnet_b3": 1536,#TESTED
     "efficientnet_v2_s": 1280,#TESTED
     "mobilenet_v3_small": 576,#TESTED
     "mobilenet_v3_large": 960,#TESTED
-    "maxvit_t" : 64,#TESTED
     "regnet_y_1_6gf":888,#TESTED
     "convnext_small" : 768,#TESTED
+    "convnext_base": 1024,
     "regnet_y_16gf":888,#TESTED
     "swin_t": 768,#TESTED
     "swin_v2_t": 768,#TESTED
-
-
-
-    #old test
-    "ConvNext_base": 1024,
-    "ConvNext_tiny": 768,
-    "efficientnet_v2_l": 1280,
-    "mobilenet_v2" : 3,
-    "squeezenet1_1": 3,
-    "efficientnet_b0": 1280,
-    "resnext50_32x4d": 2048,
-    "vit_b_32":768,
-    "resnext50_32x4d" : 2048,
-    "SWIN_V2_B": 1024,
-    "shufflenet_v2_x2_0": 976,
 }
 
 
@@ -127,8 +111,6 @@ class GeoLocalizationNet(nn.Module):
         return x
 
 
-
-
 def get_pretrained_torchvision_model(backbone_name : str) -> torch.nn.Module:
     """This function takes the name of a backbone and returns the corresponding pretrained
     model from torchvision. Examples of backbone_name are 'VGG16' or 'ResNet18'
@@ -159,9 +141,9 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
                 p.requires_grad = False
         logging.debug("Train last layers of the VGG-16, freeze the previous ones")
 
-    ### ROBA NUOVA#######################################
+    #Efficienet backbones
 
-    elif backbone_name.startswith("efficientnet_v2_s"):
+    elif backbone_name.startswith("efficientnet_b0"):
         
         layers = list(backbone.features.children()) # Remove avg pooling and FC layer
         for layer in layers[:-2]: # freeze all the layers except the last two
@@ -177,13 +159,15 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
                 p.requires_grad = False
         logging.debug("Train last two layers of EfficientNet, freeze the previous ones")
 
-    elif backbone_name.startswith("efficientnet_b0"):
+    elif backbone_name.startswith("efficientnet_v2_s"):
         
         layers = list(backbone.features.children()) # Remove avg pooling and FC layer
         for layer in layers[:-2]: # freeze all the layers except the last two
             for p in layer.parameters():
                 p.requires_grad = False
         logging.debug("Train last two layers of EfficientNet, freeze the previous ones")
+
+    #Mobilenet backbones
 
     elif backbone_name.startswith("mobilenet_v3_small"):
 
@@ -203,12 +187,7 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
                 p.requires_grad = False
         logging.debug("Train last two layers of MobileNet, freeze the previous ones")
 
-    elif backbone_name.startswith("maxvit_t"): ##NOT WORKING
-        layers = list(backbone.children())[:-2] # Remove avg pooling and FC layer
-        for x in layers:
-            for p in x.parameters():
-                p.requires_grad = False # freeze all the layers except the last three blocks
-        logging.debug("Train last three layers of Swin, freeze the previous ones")
+    #Regnet backbones
 
     elif backbone_name.startswith("regnet_y_1_6gf"):
         
@@ -226,6 +205,8 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
                 p.requires_grad = False
         logging.debug("Train last two layers of RegNet, freeze the previous ones")
 
+    #ConvNext backbones
+
     elif backbone_name.startswith("convnext_small"):
         
         layers = list(backbone.features.children()) # Remove avg pooling and FC layer
@@ -233,6 +214,18 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
             for p in layer.parameters():
                 p.requires_grad = False
         logging.debug("Train last two layers of EfficientNet, freeze the previous ones")
+    
+    elif backbone_name == "convnext_base":
+       for name, child in backbone.named_children():
+            if name == "layer3":  # Freeze layers before conv_3
+                break
+            for params in child.parameters():
+                params.requires_grad = False
+       logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
+       layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
+
+
+    #Swin backbones
 
     elif backbone_name.startswith("swin_t"):
 
@@ -251,115 +244,7 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
         logging.debug("Train last three layers of Swin, freeze the previous ones")
 
 
-    ####################################################
-   
-    elif backbone_name == "ConvNext_base":
-       for name, child in backbone.named_children():
-            if name == "layer3":  # Freeze layers before conv_3
-                break
-            for params in child.parameters():
-                params.requires_grad = False
-       logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
-       layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
-    
-    elif backbone_name == "ConvNext_tiny":
-       for name, child in backbone.named_children():
-            if name == "layer3":  # Freeze layers before conv_3
-                break
-            for params in child.parameters():
-                params.requires_grad = False
-       logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
-       layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
 
-
-    elif backbone_name == "efficientnet_v2_l":
-        for name, child in backbone.named_children():
-                if name == "layer3":  # Freeze layers before conv_3
-                    break
-                for params in child.parameters():
-                    params.requires_grad = False
-        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
-        layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
-
-    
-
-    
-    elif backbone_name == "squeezenet1_1":
-        for name, child in backbone.named_children():
-                if name == "layer3":  # Freeze layers before conv_3
-                    break
-                for params in child.parameters():
-                    params.requires_grad = False
-        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
-        layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
-
-    elif backbone_name == "efficientnet_b0":
-        for name, child in backbone.named_children():
-                if name == "layer3":  # Freeze layers before conv_3
-                    break
-                for params in child.parameters():
-                    params.requires_grad = False
-        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
-        layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
-
-    elif backbone_name == "resnext50_32x4d":
-        for name, child in backbone.named_children():
-                if name == "layer3":  # Freeze layers before conv_3
-                    break
-                for params in child.parameters():
-                    params.requires_grad = False
-        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
-        layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
-
-   
-    
-    elif backbone_name == "vit_b_32":
-        for name, child in backbone.named_children():
-               
-                for params in child.parameters():
-                    params.requires_grad = False
-        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
-        layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
-
-    elif backbone_name == "resnext50_32x4d":
-        for name, child in backbone.named_children():
-               
-                for params in child.parameters():
-                    params.requires_grad = False
-        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
-        layers = list(backbone.children())[:-2]  # Remove avg pooling and FC layer
-
-    elif backbone_name == "swin_t":
-        for name, child in backbone.named_children():
-               
-                for params in child.parameters():
-                    params.requires_grad = False
-        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
-        layers = list(backbone.children())[:-2]  
-
-    elif backbone_name == "SWIN_V2_B":
-        for name, child in backbone.named_children():
-               
-                for params in child.parameters():
-                    params.requires_grad = False
-        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
-        layers = list(backbone.children())[:-2]  
-    
-    elif backbone_name == "shufflenet_v2_x2_0":
-        for name, child in backbone.named_children():
-               
-                for params in child.parameters():
-                    params.requires_grad = False
-        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
-        layers = list(backbone.children())[:-2]  
-
-    elif backbone_name == "regnet_y_1_6gf":
-        for name, child in backbone.named_children():
-               
-                for params in child.parameters():
-                    params.requires_grad = False
-        logging.debug(f"Train only layer3 and layer4 of the {backbone_name}, freeze the previous ones")
-        layers = list(backbone.children())[:-2]  
 
     backbone = torch.nn.Sequential(*layers)
     
