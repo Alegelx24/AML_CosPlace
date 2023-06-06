@@ -49,7 +49,7 @@ CHANNELS_NUM_IN_LAST_CONV = {
 }
 
 
-
+'''
 def feature_L2_norm(feature):
     epsilon = 1e-6
     norm = torch.pow(torch.sum(torch.pow(feature, 2), 1)+epsilon, 0.5).unsqueeze(1).expand_as(feature)
@@ -92,28 +92,22 @@ class HomographyRegression(nn.Module):
         x = x.contiguous().view(x.size(0), -1)
         x = self.linear(x)
         return x.reshape(B, 8, 2)
+'''
 
 class GeoLocalizationNet(nn.Module):
     def __init__(self, backbone : str, fc_output_dim : int, grl_discriminator=None, homography_regression=None):
-        """Return a model for GeoLocalization.
-        
+        """Return a model for GeoLocalization.        
         Args:
             backbone (str): which torchvision backbone to use. Must be VGG16 or a ResNet.
             fc_output_dim (int): the output dimension of the last fc layer, equivalent to the descriptors dimension.
         """
         super().__init__()
         assert backbone in CHANNELS_NUM_IN_LAST_CONV, f"backbone must be one of {list(CHANNELS_NUM_IN_LAST_CONV.keys())}"
-        
      
         self.backbone, features_dim = get_backbone(backbone)
-
         
         self.grl_discriminator=grl_discriminator
         # self.grl_discriminator=GRL.get_discriminator(features_dim, 1) #NEED TO PASS FEATURES DIM AS PARAMETER?
-
-        self.homography_regression=homography_regression
-        
-
 
         self.aggregation = nn.Sequential(
             L2Norm(),
@@ -124,43 +118,15 @@ class GeoLocalizationNet(nn.Module):
         )
     
     def forward(self, x, grl=False, operation=None, args=None):
+        if grl:
+            x = self.backbone(x)
+            x= self.grl_discriminator(x)
+        else:
+            x = self.backbone(x)
+            x = self.aggregation(x)
+        return x
 
-        if operation == "similarity":
-            tensor_img_1, tensor_img_2 = args
-            return self.similarity(tensor_img_1, tensor_img_2)
-        
-        elif operation == "regression":
-            similarity_matrix = args
-            return self.regression(similarity_matrix)
-        
-        elif operation == "similarity_and_regression":
-            tensor_img_1, tensor_img_2 = args
-            similarity_matrix_1to2, similarity_matrix_2to1 = self.similarity(tensor_img_1, tensor_img_2)
-            return self.regression(similarity_matrix_1to2), self.regression(similarity_matrix_2to1)            
 
-        elif operation==None:
-            if grl:
-
-                x = self.backbone(x)
-                x= self.grl_discriminator(x)
-
-            else:
-            
-                x = self.backbone(x)
-                x = self.aggregation(x)
-
-            return x
-        
-   
-    def similarity(self, tensor_img_1, tensor_img_2):
-        features_1 = self.features_extractor(tensor_img_1.cuda())
-        features_2 = self.features_extractor(tensor_img_2.cuda())
-        similarity_matrix_1to2 = compute_similarity(features_1, features_2)
-        similarity_matrix_2to1 = compute_similarity(features_2, features_1)
-        return similarity_matrix_1to2, similarity_matrix_2to1
-    
-    def regression(self, similarity_matrix):
-        return self.homography_regression(similarity_matrix)
 
 
 def get_pretrained_torchvision_model(backbone_name : str) -> torch.nn.Module:

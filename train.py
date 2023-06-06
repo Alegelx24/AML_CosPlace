@@ -24,9 +24,6 @@ if __name__ == '__main__' :
     from datasets.test_dataset import TestDataset
     from datasets.train_dataset import TrainDataset
     from datasets.grl_dataset import GrlDataset
-    from warping_model.warping_dataset import HomographyDataset
-   # from datasets.dataset_qp import DatasetQP
-    import warping_model.warping_dataset as WDS
 
     from torchvision.transforms.functional import hflip
     from torch.utils.data.dataloader import DataLoader
@@ -62,50 +59,52 @@ if __name__ == '__main__' :
 
     model = model.to(args.device).train()
 
-    #### Warping module
-    if args.warping_module:
 
-        kernel_sizes= [7, 5, 5, 5, 5, 5]
-        channels = [225, 128, 128, 64, 64, 64, 64]
-        homography_regression = network.HomographyRegression(kernel_sizes=kernel_sizes, channels=channels, padding=1)
-        model = network.GeoLocalizationNet(args.backbone, args.fc_output_dim, grl_discriminator, homography_regression=homography_regression).cuda().eval()
-        model = torch.nn.DataParallel(model)
+    '''
+        #### Warping module
+        if args.warping_module:
 
-        consistency_w=0.1
-        features_wise_w=10
-        ss_w=1
-        batch_size_consistency=16
-        batch_size_features_wise=16
-        num_reranked_preds= 5
+            kernel_sizes= [7, 5, 5, 5, 5, 5]
+            channels = [225, 128, 128, 64, 64, 64, 64]
+            homography_regression = network.HomographyRegression(kernel_sizes=kernel_sizes, channels=channels, padding=1)
+            model = network.GeoLocalizationNet(args.backbone, args.fc_output_dim, grl_discriminator, homography_regression=homography_regression).cuda().eval()
+            model = torch.nn.DataParallel(model)
 
-    
-    def to_cuda(list_):
-        """Move to cuda all items of the list."""
-        return [item.cuda() for item in list_]
-    
-    def hor_flip(points):
-        """Flip points horizontally.
+            consistency_w=0.1
+            features_wise_w=10
+            ss_w=1
+            batch_size_consistency=16
+            batch_size_features_wise=16
+            num_reranked_preds= 5
+
         
-        Parameters
-        ----------
-        points : torch.Tensor of shape [B, 8, 2]
-        """
-        new_points = torch.zeros_like(points)
-        new_points[:, 0::2, :] = points[:, 1::2, :]
-        new_points[:, 1::2, :] = points[:, 0::2, :]
-        new_points[:, :, 0] *= -1
-        return new_points
-    
-    mse = torch.nn.MSELoss()
+        def to_cuda(list_):
+            """Move to cuda all items of the list."""
+            return [item.cuda() for item in list_]
+        
+        def hor_flip(points):
+            """Flip points horizontally.
+            
+            Parameters
+            ----------
+            points : torch.Tensor of shape [B, 8, 2]
+            """
+            new_points = torch.zeros_like(points)
+            new_points[:, 0::2, :] = points[:, 1::2, :]
+            new_points[:, 1::2, :] = points[:, 0::2, :]
+            new_points[:, :, 0] *= -1
+            return new_points
+        
+        mse = torch.nn.MSELoss()
 
-    def compute_loss(loss, weight):
-        """Compute loss and gradients separately for each loss, and free the
-        computational graph to reduce memory consumption.
-        """
-        loss *= weight
-        loss.backward()
-        return loss.item()
-
+        def compute_loss(loss, weight):
+            """Compute loss and gradients separately for each loss, and free the
+            computational graph to reduce memory consumption.
+            """
+            loss *= weight
+            loss.backward()
+            return loss.item()
+    '''
 
     #### Optimizer
     criterion = torch.nn.CrossEntropyLoss()
@@ -115,6 +114,8 @@ if __name__ == '__main__' :
     groups = [TrainDataset(args, args.train_set_folder, M=args.M, alpha=args.alpha, N=args.N, L=args.L,
                         current_group=n, min_images_per_class=args.min_images_per_class) for n in range(args.groups_num)]
     # Each group has its own classifier, which depends on the number of classes in the group
+   
+    #Loss selection
     if args.loss =="cosface":
         classifiers = [cosface_loss.MarginCosineProduct(args.fc_output_dim, len(group)) for group in groups]
     elif args.loss =="arcface":
@@ -137,16 +138,6 @@ if __name__ == '__main__' :
                         positive_dist_threshold=args.positive_dist_threshold)
     logging.info(f"Validation set: {val_ds}")
     logging.info(f"Test set: {test_ds}")
-
-    if args.warping_module:
-        train_ds_onegroup=TrainDataset(args, args.train_set_folder, M=args.M, alpha=args.alpha, N=args.N, L=args.L,
-                        current_group=0, min_images_per_class=args.min_images_per_class)
-        ss_dataset = HomographyDataset(root_path=f"{args.dataset_folder}/train", k=0.6)
-        dataset_qp = DatasetQP(model, args.fc_output_dim, groups, qp_threshold=1.2)
-        dataloader_qp = commons.InfiniteDataLoader(dataset_qp, shuffle=True,
-                                                    batch_size=max(batch_size_consistency=16, batch_size_features_wise=16),
-                                                    num_workers=2, pin_memory=True, drop_last=True)
-        data_iter_qp = iter(dataloader_qp)
 
 
     #### Resume
@@ -224,11 +215,6 @@ if __name__ == '__main__' :
         if args.grl:
             grl_dataloader_iterator=iter(grl_dataloader)
 
-
-        if args.warping_module:
-             homography_regression = homography_regression.train()
-
-
         model = model.train()
         
         epoch_losses = np.zeros((0, 1), dtype=np.float32)
@@ -292,6 +278,7 @@ if __name__ == '__main__' :
                 epoch_grl_loss += loss_grl.item()
                 del grl_images, labels, outputs, loss_grl
 
+            '''
             if args.warping_module:
                 warped_img_1, warped_img_2, warped_intersection_points_1, warped_intersection_points_2 = to_cuda(next(dataloader_iterator))
                 queries, positives = to_cuda(next(data_iter_qp))
@@ -348,7 +335,7 @@ if __name__ == '__main__' :
 
                 epoch_losses = np.concatenate((epoch_losses, np.array([[ss_loss, consistency_loss, features_wise_loss]])))
 
-            
+            '''            
 
         classifiers[current_group_num] = classifiers[current_group_num].cpu()
         util.move_to_device(classifiers_optimizers[current_group_num], "cpu")
@@ -376,15 +363,6 @@ if __name__ == '__main__' :
     
 
     #### Test best model on test set v1
-
-    if args.warping_module: #CANCELLARE?
-        homography_regression = homography_regression.eval()
-        test_baseline_recalls, test_baseline_recalls_pretty_str, test_baseline_predictions, _, _ = \
-        util.compute_features(test_ds, model, args.fc_output_dim)
-        logging.info(f"baseline test: {test_baseline_recalls_pretty_str}")
-        _, reranked_test_recalls_pretty_str = test.test(model, test_baseline_predictions, test_ds,
-                                                    num_reranked_predictions=num_reranked_preds)
-        logging.info(f"test after warping - {reranked_test_recalls_pretty_str}")
     
     best_model_state_dict = torch.load(f"{output_folder}/best_model.pth")
     model.load_state_dict(best_model_state_dict)
