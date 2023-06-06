@@ -33,51 +33,6 @@ CHANNELS_NUM_IN_LAST_CONV = {
 }
 
 
-'''
-def feature_L2_norm(feature):
-    epsilon = 1e-6
-    norm = torch.pow(torch.sum(torch.pow(feature, 2), 1)+epsilon, 0.5).unsqueeze(1).expand_as(feature)
-    return torch.div(feature.contiguous(), norm)
-
-
-def compute_similarity(features_a, features_b):
-    b, c, h, w = features_a.shape
-    features_a = features_a.transpose(2, 3).contiguous().view(b, c, h*w)
-    features_b = features_b.view(b, c, h*w).transpose(1, 2)
-    features_mul = torch.bmm(features_b, features_a)
-    correlation_tensor = features_mul.view(b, h, w, h*w).transpose(2, 3).transpose(1, 2)
-    correlation_tensor = feature_L2_norm(F.relu(correlation_tensor))
-    return correlation_tensor
-
-class HomographyRegression(nn.Module):
-    def __init__(self, output_dim=16, kernel_sizes=[7, 5], channels=[225, 128, 64], padding=0):
-        super().__init__()
-        assert len(kernel_sizes) == len(channels) - 1, \
-            f"In HomographyRegression the number of kernel_sizes must be less than channels, but you said {kernel_sizes} and {channels}"
-        nn_modules = []
-        for in_channels, out_channels, kernel_size in zip(channels[:-1], channels[1:], kernel_sizes):
-            nn_modules.append(nn.Conv2d(in_channels, out_channels, kernel_size, padding=padding))
-            nn_modules.append(nn.BatchNorm2d(out_channels))
-            nn_modules.append(nn.ReLU())
-        self.conv = nn.Sequential(*nn_modules)
-        # Find out output size of last conv, aka the input of the fully connected
-        shape = self.conv(torch.ones([2, 225, 15, 15])).shape
-        output_dim_last_conv = shape[1] * shape[2] * shape[3]
-        self.linear = nn.Linear(output_dim_last_conv, output_dim)
-        # Initialize the weights/bias with identity transformation
-        init_points = torch.tensor([-1, -1, 1, -1, 1, 1, -1, 1]).type(torch.float)
-        init_points = torch.cat((init_points, init_points))
-        self.linear.bias.data = init_points
-        self.linear.weight.data = torch.zeros_like((self.linear.weight.data))
-    
-    def forward(self, x):
-        B = x.shape[0]
-        x = self.conv(x)
-        x = x.contiguous().view(x.size(0), -1)
-        x = self.linear(x)
-        return x.reshape(B, 8, 2)
-'''
-
 class GeoLocalizationNet(nn.Module):
     def __init__(self, backbone : str, fc_output_dim : int, grl_discriminator=None, homography_regression=None):
         """Return a model for GeoLocalization.        
@@ -242,8 +197,6 @@ def get_backbone(backbone_name : str) -> Tuple[torch.nn.Module, int]:
             for p in x.parameters():
                 p.requires_grad = False # freeze all the layers except the last three blocks
         logging.debug("Train last three layers of Swin, freeze the previous ones")
-
-
 
 
     backbone = torch.nn.Sequential(*layers)

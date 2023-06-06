@@ -5,7 +5,6 @@ import torchvision.transforms as T
 import torchvision.transforms.functional as TF
 import random
 
-
 class DeviceAgnosticColorJitter(T.ColorJitter):
     def __init__(self, brightness: float = 0., contrast: float = 0., saturation: float = 0., hue: float = 0.):
         """This is the same as T.ColorJitter but it only accepts batches of images and works on GPU"""

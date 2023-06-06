@@ -3,8 +3,6 @@ import torch.nn as nn
 from torch.nn import Parameter
 import torch.nn.functional as F
 
-
-
 def cosine_sim(x1: torch.Tensor, x2: torch.Tensor, dim: int = 1, eps: float = 1e-8) -> torch.Tensor:
     ip = torch.mm(x1, x2.t())
     w1 = torch.norm(x1, 2, dim)

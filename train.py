@@ -60,52 +60,6 @@ if __name__ == '__main__' :
     model = model.to(args.device).train()
 
 
-    '''
-        #### Warping module
-        if args.warping_module:
-
-            kernel_sizes= [7, 5, 5, 5, 5, 5]
-            channels = [225, 128, 128, 64, 64, 64, 64]
-            homography_regression = network.HomographyRegression(kernel_sizes=kernel_sizes, channels=channels, padding=1)
-            model = network.GeoLocalizationNet(args.backbone, args.fc_output_dim, grl_discriminator, homography_regression=homography_regression).cuda().eval()
-            model = torch.nn.DataParallel(model)
-
-            consistency_w=0.1
-            features_wise_w=10
-            ss_w=1
-            batch_size_consistency=16
-            batch_size_features_wise=16
-            num_reranked_preds= 5
-
-        
-        def to_cuda(list_):
-            """Move to cuda all items of the list."""
-            return [item.cuda() for item in list_]
-        
-        def hor_flip(points):
-            """Flip points horizontally.
-            
-            Parameters
-            ----------
-            points : torch.Tensor of shape [B, 8, 2]
-            """
-            new_points = torch.zeros_like(points)
-            new_points[:, 0::2, :] = points[:, 1::2, :]
-            new_points[:, 1::2, :] = points[:, 0::2, :]
-            new_points[:, :, 0] *= -1
-            return new_points
-        
-        mse = torch.nn.MSELoss()
-
-        def compute_loss(loss, weight):
-            """Compute loss and gradients separately for each loss, and free the
-            computational graph to reduce memory consumption.
-            """
-            loss *= weight
-            loss.backward()
-            return loss.item()
-    '''
-
     #### Optimizer
     criterion = torch.nn.CrossEntropyLoss()
     model_optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
@@ -278,64 +232,7 @@ if __name__ == '__main__' :
                 epoch_grl_loss += loss_grl.item()
                 del grl_images, labels, outputs, loss_grl
 
-            '''
-            if args.warping_module:
-                warped_img_1, warped_img_2, warped_intersection_points_1, warped_intersection_points_2 = to_cuda(next(dataloader_iterator))
-                queries, positives = to_cuda(next(data_iter_qp))
-                
-                with torch.no_grad():
-                    similarity_matrix_1to2, similarity_matrix_2to1 = model("similarity", [warped_img_1, warped_img_2])
-                    if  consistency_w != 0:
-                        queries_cons = queries[:batch_size_consistency]
-                        positives_cons = positives[:batch_size_consistency]
-                        similarity_matrix_q2p, similarity_matrix_p2q = model("similarity", [queries_cons, positives_cons])
-                        fl_similarity_matrix_q2p, fl_similarity_matrix_p2q = model("similarity", [hflip(queries_cons), hflip(positives_cons)])
-                        del queries_cons, positives_cons
-                
-                # ss_loss
-                pred_warped_intersection_points_1 = model("regression", similarity_matrix_1to2)
-                pred_warped_intersection_points_2 = model("regression", similarity_matrix_2to1)
-                ss_loss = (mse(pred_warped_intersection_points_1[:, :4], warped_intersection_points_1) +
-                        mse(pred_warped_intersection_points_1[:, 4:], warped_intersection_points_2) +
-                        mse(pred_warped_intersection_points_2[:, :4], warped_intersection_points_2) +
-                        mse(pred_warped_intersection_points_2[:, 4:], warped_intersection_points_1))
-                ss_loss = compute_loss(ss_loss, ss_w)
-                del pred_warped_intersection_points_1, pred_warped_intersection_points_2
-           
-                
-                # consistency_loss
-                pred_intersection_points_q2p = model("regression", similarity_matrix_q2p)
-                pred_intersection_points_p2q = model("regression", similarity_matrix_p2q)
-                fl_pred_intersection_points_q2p = model("regression", fl_similarity_matrix_q2p)
-                fl_pred_intersection_points_p2q = model("regression", fl_similarity_matrix_p2q)
-                four_predicted_points = [
-                    torch.cat((pred_intersection_points_q2p[:, 4:], pred_intersection_points_q2p[:, :4]), 1),
-                    pred_intersection_points_p2q,
-                    hor_flip(torch.cat((fl_pred_intersection_points_q2p[:, 4:], fl_pred_intersection_points_q2p[:, :4]), 1)),
-                    hor_flip(fl_pred_intersection_points_p2q)
-                ]
-                four_predicted_points_centroids = torch.cat([p[None] for p in four_predicted_points]).mean(0).detach()
-                consistency_loss = sum([mse(pred, four_predicted_points_centroids) for pred in four_predicted_points])
-                consistency_loss = compute_loss(consistency_loss, consistency_w)
-                del pred_intersection_points_q2p, pred_intersection_points_p2q
-                del fl_pred_intersection_points_q2p, fl_pred_intersection_points_p2q
-                del four_predicted_points
-         
-                
-                # features_wise_loss
-                queries_fw = queries[:batch_size_features_wise]
-                positives_fw = positives[:batch_size_features_wise]
-                # Add random weights to avoid numerical instability
-                random_weights = (torch.rand(batch_size_features_wise, 4)**0.1).cuda()
-                w_queries, w_positives, _, _ = WDS.compute_warping(model, queries_fw, positives_fw, weights=random_weights)
-                f_queries = model("features_extractor", [w_queries, "local"])
-                f_positives = model("features_extractor", [w_positives, "local"])
-                features_wise_loss = compute_loss(mse(f_queries, f_positives), features_wise_w)
-                del queries, positives, queries_fw, positives_fw, w_queries, w_positives, f_queries, f_positives
-
-                epoch_losses = np.concatenate((epoch_losses, np.array([[ss_loss, consistency_loss, features_wise_loss]])))
-
-            '''            
+              
 
         classifiers[current_group_num] = classifiers[current_group_num].cpu()
         util.move_to_device(classifiers_optimizers[current_group_num], "cpu")
