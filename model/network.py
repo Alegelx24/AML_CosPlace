@@ -6,7 +6,6 @@ from torch import nn
 from typing import Tuple
 import torch.nn.functional as F
 import numpy as np
-import model.resnet_attention as rsn_a
 import GradientReversalLayer as GRL
 
 from model.layers import Flatten, L2Norm, GeM
@@ -22,15 +21,15 @@ CHANNELS_NUM_IN_LAST_CONV = {
     #updated backbones
     "mobilenet_v3_small": 576,#TESTED
     "efficientnet_b0": 1280,#TESTED
-    "efficientnet_b3": 1536,
+    "efficientnet_b3": 1536,#TESTED
     "efficientnet_v2_s": 1280,#TESTED
     "mobilenet_v3_small": 576,#TESTED
     "mobilenet_v3_large": 960,#TESTED
     "maxvit_t" : 64,#TESTED
     "regnet_y_1_6gf":888,#TESTED
     "convnext_small" : 768,#TESTED
-    "regnet_y_16gf":888,
-    "swin_t": 768,
+    "regnet_y_16gf":888,#TESTED
+    "swin_t": 768,#TESTED
     "swin_v2_t": 768,#TESTED
 
 
@@ -95,7 +94,7 @@ class HomographyRegression(nn.Module):
         return x.reshape(B, 8, 2)
 
 class GeoLocalizationNet(nn.Module):
-    def __init__(self, backbone : str, fc_output_dim : int, grl_discriminator=None, homography_regression=None, attention=None):
+    def __init__(self, backbone : str, fc_output_dim : int, grl_discriminator=None, homography_regression=None):
         """Return a model for GeoLocalization.
         
         Args:
@@ -105,12 +104,8 @@ class GeoLocalizationNet(nn.Module):
         super().__init__()
         assert backbone in CHANNELS_NUM_IN_LAST_CONV, f"backbone must be one of {list(CHANNELS_NUM_IN_LAST_CONV.keys())}"
         
-        if attention:
-            self.backbone=rsn_a.resnet18(True)
-            features_dim=512
-            self.weight_softmax = nn.Linear(512 , 5965).weight
-        else:
-            self.backbone, features_dim = get_backbone(backbone)
+     
+        self.backbone, features_dim = get_backbone(backbone)
 
         
         self.grl_discriminator=grl_discriminator
@@ -118,9 +113,6 @@ class GeoLocalizationNet(nn.Module):
 
         self.homography_regression=homography_regression
         
-        self.attention = attention
-
-
 
 
         self.aggregation = nn.Sequential(
@@ -148,29 +140,15 @@ class GeoLocalizationNet(nn.Module):
 
         elif operation==None:
             if grl:
+
                 x = self.backbone(x)
                 x= self.grl_discriminator(x)
 
             else:
-                if self.attention:
-                    fc_out, feature_conv, feature_convNBN = self.backbone(x)
-                    
-                    bz, nc, h, w = feature_conv.size()
-                    feature_conv_view = feature_conv.view(bz, nc, h * w)
-                    probs, idxs = fc_out.sort(1, True)
-                    class_idx = idxs[:, 0]
-                    scores = self.weight_softmax[class_idx].to(x.device)
-                    cam = torch.bmm(scores.unsqueeze(1), feature_conv_view)
-                    attention_map = F.softmax(cam.squeeze(1), dim=1)
-                    attention_map = attention_map.view(attention_map.size(0), 1, h, w)
-                    attention_features = feature_convNBN * attention_map.expand_as(feature_conv)
-                    
-                    x = attention_features
-                    
-                else:
-                    x = self.backbone(x)
-                    x = self.aggregation(x)
             
+                x = self.backbone(x)
+                x = self.aggregation(x)
+
             return x
         
    

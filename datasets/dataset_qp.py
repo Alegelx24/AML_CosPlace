@@ -1,4 +1,5 @@
 
+'''
 import torch
 import util
 from torchvision import transforms
@@ -62,3 +63,6 @@ class DatasetQP(torch.nn.Module):
     
     def __len__(self):
         return len(self.query_positive_distances)
+    
+    '''
+    

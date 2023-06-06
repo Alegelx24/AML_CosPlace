@@ -25,7 +25,7 @@ if __name__ == '__main__' :
     from datasets.train_dataset import TrainDataset
     from datasets.grl_dataset import GrlDataset
     from warping_model.warping_dataset import HomographyDataset
-    from datasets.dataset_qp import DatasetQP
+   # from datasets.dataset_qp import DatasetQP
     import warping_model.warping_dataset as WDS
 
     from torchvision.transforms.functional import hflip
@@ -51,7 +51,7 @@ if __name__ == '__main__' :
         grl_discriminator = None
 
     #### Model
-    model = network.GeoLocalizationNet(args.backbone, args.fc_output_dim, grl_discriminator, attention=args.attention)
+    model = network.GeoLocalizationNet(args.backbone, args.fc_output_dim, grl_discriminator)
 
     logging.info(f"There are {torch.cuda.device_count()} GPUs and {multiprocessing.cpu_count()} CPUs.")
 
