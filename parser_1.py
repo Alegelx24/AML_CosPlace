@@ -35,7 +35,7 @@ def parse_arguments(is_training: bool = True):
     parser.add_argument("--saturation", type=float, default=0.7, help="_")
 
     # Pre Processing Augmentation
-    parser.add_argument("--preprocessing", type=bool, default=False, help="_")
+    parser.add_argument("--preprocessing", action="store_true", help="_")
     parser.add_argument("--gamma", type=float, default=0.7, help="_")
     parser.add_argument("--random_resized_crop", type=float, default=0.5, help="_")
 
@@ -69,8 +69,8 @@ def parse_arguments(is_training: bool = True):
     parser.add_argument("--num_reranked_predictions", type=int, default=5, help="_")
 
     #MODEL SOUP
-    parser.add_argument("--model_soupe_greedy", type=bool, default=False, help="_") 
-    parser.add_argument("--model_soupe_uniform", type=bool, default=False, help="_") 
+    parser.add_argument("--model_soupe_greedy", action="store_true", help="_") 
+    parser.add_argument("--model_soupe_uniform", action="store_true", help="_") 
     
     #FDA
     parser.add_argument("--fda", action="store_true",help="_") 
