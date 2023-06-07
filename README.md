@@ -78,4 +78,4 @@ You can download plenty of trained models below.
 
 ## Trained Models
 
-All the trained model are downloadable at this [[link](https://drive.google.com/drive/folders/1mtALaGvLLRjGLgJgfIe7HeCcUaG_YDiQ?usp=sharing)]
+All the trained model are downloadable at this [[link](https://drive.google.com/drive/folders/1mtALaGvLLRjGLgJgfIe7HeCcUaG_YDiQ?usp=sharing)].
