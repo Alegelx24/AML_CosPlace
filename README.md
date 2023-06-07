@@ -3,6 +3,11 @@
 
 This is the pyTorch implementation of Advanced Machine Learning course project at Politecnico di Torino. It consists in an improvement of the existing Cosplace visual-geolocalization model [[ArXiv](https://arxiv.org/abs/2204.02287)]. You can find the corresponding paper here.
 
+## Authors
+The authors of this project are:
+- Gelsi Alessandro S303525 - [Github](https://github.com/Alegelx24)
+- Ferraro Luca S301843 - [Github](https://github.com/LucaFerraro00)
+
 ## Link to Datasets 
 
 - [SF-XS](https://drive.google.com/file/d/1tQqEyt3go3vMh4fj_LZrRcahoTbzzH-y/view?usp=drive_link)
