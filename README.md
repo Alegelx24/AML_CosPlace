@@ -5,8 +5,8 @@ This is the pyTorch implementation of Advanced Machine Learning course project a
 
 ## Authors
 The authors of this project are:
-- Gelsi Alessandro S303525 - [Github](https://github.com/Alegelx24)
 - Ferraro Luca S301843 - [Github](https://github.com/LucaFerraro00)
+- Gelsi Alessandro S303525 - [Github](https://github.com/Alegelx24)
 
 ## Link to Datasets 
 
