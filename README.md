@@ -15,9 +15,6 @@ This is the pyTorch implementation of Advanced Machine Learning course project a
 
   `$ python train.py --dataset_folder path/to/sf-xs`
 
-the script automatically splits SF-xs in Groups, and saves the resulting object in the folder `cache`.
-By default training is performed with a ResNet-18 with descriptors dimensionality 512 is used, which fits in less than 4GB of VRAM.
-
 - To set groups number and epochs number: 
 
   `$ python train.py --dataset_folder path/to/sf-xs --groups_num 1 --epochs_num 3`
