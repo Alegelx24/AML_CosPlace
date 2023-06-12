@@ -3,6 +3,11 @@
 
 This is the pyTorch implementation of Advanced Machine Learning course project at Politecnico di Torino. It consists in an improvement of the existing Cosplace visual-geolocalization model [[ArXiv](https://arxiv.org/abs/2204.02287)]. You can find the corresponding paper here.
 
+## Authors
+The authors of this project are:
+- Ferraro Luca S301843 - [Github](https://github.com/LucaFerraro00)
+- Gelsi Alessandro S303525 - [Github](https://github.com/Alegelx24)
+
 ## Link to Datasets 
 
 - [SF-XS](https://drive.google.com/file/d/1tQqEyt3go3vMh4fj_LZrRcahoTbzzH-y/view?usp=drive_link)
@@ -14,9 +19,6 @@ This is the pyTorch implementation of Advanced Machine Learning course project a
 - After downloading the dataset, to train the model you can simply run 
 
   `$ python train.py --dataset_folder path/to/sf-xs`
-
-the script automatically splits SF-xs in Groups, and saves the resulting object in the folder `cache`.
-By default training is performed with a ResNet-18 with descriptors dimensionality 512 is used, which fits in less than 4GB of VRAM.
 
 - To set groups number and epochs number: 
 
@@ -76,4 +78,4 @@ You can download plenty of trained models below.
 
 ## Trained Models
 
-All the trained model are downloadable at this [[link](https://drive.google.com/drive/folders/1mtALaGvLLRjGLgJgfIe7HeCcUaG_YDiQ?usp=sharing)]
+All the trained model are downloadable at this [[link](https://drive.google.com/drive/folders/1mtALaGvLLRjGLgJgfIe7HeCcUaG_YDiQ?usp=sharing)].
