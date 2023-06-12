@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     model = model.to(args.device)
 
-    
+    #model soup
     if args.model_soupe_uniform:
         print("loading state dicts for model soup uniform...")
         state_dicts = model_soup.load_models()
@@ -83,7 +83,7 @@ if __name__ == '__main__':
             for j in ingredient_indices:
                 alphal[j] = 1 / len(ingredient_indices)
             model = model_soup.get_model_soup(model, state_dicts, alphal)
-
+    #fda on test
     if args.fda:
         fda.FDA_database_transform(args.test_set_folder+"/database",args.test_set_folder+"/queries_v1",args.test_set_folder+"/database_trasformed", args.fda_weight)
         test_ds = TestDataset(args.test_set_folder,database_folder="database_trasformed", queries_folder="queries_v1",

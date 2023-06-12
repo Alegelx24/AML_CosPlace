@@ -1,15 +1,13 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 import math
 
+# Based on: https://github.com/ydwen/opensphere/blob/main/model/head/sphereface.py
+    
+
 class SphereFace(nn.Module):
-    """ reference: <SphereFace: Deep Hypersphere Embedding for Face Recognition>"
-        It also used characteristic gradient detachment tricks proposed in
-        <SphereFace Revived: Unifying Hyperspherical Face Recognition>.
-        based on: https://github.com/ydwen/opensphere/blob/main/model/head/sphereface.py
-    """
+    
     def __init__(self, feat_dim, num_class, s=30., m=1.5):
         super(SphereFace, self).__init__()
         self.feat_dim = feat_dim
@@ -32,7 +30,7 @@ class SphereFace(nn.Module):
                 1, y.view(-1, 1), self.m, reduce='multiply',
             )
             k = (m_theta / math.pi).floor()
-            sign = -2 * torch.remainder(k, 2) + 1  # (-1)**k
+            sign = -2 * torch.remainder(k, 2) + 1  
             phi_theta = sign * torch.cos(m_theta) - 2. * k
             d_theta = phi_theta - cos_theta
 

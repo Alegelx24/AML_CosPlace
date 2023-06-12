@@ -17,14 +17,12 @@ if __name__ == '__main__' :
     import sphereface_loss
     import elastic_face
     import new_elastic_face
-    import model_soup
     import GradientReversalLayer as GRL
     import augmentations
     from model import network
     from datasets.test_dataset import TestDataset
     from datasets.train_dataset import TrainDataset
     from datasets.grl_dataset import GrlDataset
-
     from torchvision.transforms.functional import hflip
     from torch.utils.data.dataloader import DataLoader
 

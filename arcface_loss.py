@@ -3,6 +3,8 @@ import torch.nn as nn
 from torch.nn import Parameter
 import torch.nn.functional as F
 
+# Based on https://github.com/ydwen/opensphere/blob/main/model/head/arcface.py
+
 def cosine_sim(x1: torch.Tensor, x2: torch.Tensor, dim: int = 1, eps: float = 1e-8) -> torch.Tensor:
     ip = torch.mm(x1, x2.t())
     w1 = torch.norm(x1, 2, dim)
@@ -10,9 +12,6 @@ def cosine_sim(x1: torch.Tensor, x2: torch.Tensor, dim: int = 1, eps: float = 1e
     return ip / torch.ger(w1, w2).clamp(min=eps)
 
 class ArcFace(nn.Module):
-    """ reference: <Additive Angular Margin Loss for Deep Face Recognition>
-        and based on https://github.com/ydwen/opensphere/blob/main/model/head/arcface.py
-    """
     def __init__(self, feat_dim, num_class, s=64., m=0.5):
         super(ArcFace, self).__init__()
         self.feat_dim = feat_dim
