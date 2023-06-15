@@ -44,11 +44,11 @@ The authors of this project are:
 
   `$ python train.py --dataset_folder path/to/sf-xs --preprocessing --groups_num 1 --epochs_num 3`
 
-- You can perform domain adaptation through grl running
+- You can perform domain adaptation with grl running
 
   `$ python train.py --dataset_folder path/to/sf-xs --groups_num 1 --epochs_num 3  --grl --dataset_root path/to/target_dataset --grl_datasets target_dataset_subfolder_name `
 
-Run `$ python day_to_night_processing.py` in order to synthetically create a night domain dataset starting from a day one. 
+Run `$ python day_to_night_processing.py` to synthetically create a night domain dataset starting from a day one. 
 
 - You can also speed up your training with Automatic Mixed Precision 
 
