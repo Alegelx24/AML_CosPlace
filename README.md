@@ -81,3 +81,24 @@ You can download plenty of trained models below.
 ## Trained Models
 
 All the trained model are downloadable at this [[link](https://drive.google.com/drive/folders/1mtALaGvLLRjGLgJgfIe7HeCcUaG_YDiQ?usp=sharing)].
+
+# Results
+
+## CosPlace baseline (R@1/R@5)
+| sf-xs (test) | Tokyo-xs | Tokyo-night |
+|-----------------|-----------------|-----------------|
+| 53.4/66.5 | 69.5/84.8| 50.5/72.4 |
+
+
+## CosPlace with different loss functions (R@1/R@5)
+| | sf-xs (test) | Tokyo-xs | Tokyo-night |
+|-|-----------------|-----------------|-----------------|
+|CosPlace CosFace| 53.4/66.5 | 69.5/84.8| 50.5/72.4 |
+|CosPlace SphereFace (s=30; m=1.5)| 49.6/63.8  |69.2/87.0 | 90.2/53.3 |
+| ArcFace (s=64; m=0.5)|47.9/61.5| 68.9/84.1 | 53.3/72.4 |
+
+## ImprovedCosPlace (R@1/R@5)
+| sf-xs (test) | Tokyo-xs | Tokyo-night |
+|-----------------|-----------------|-----------------|
+| 67.9/77.0 | 87.0/91.7| 80.0/87.6 |
+    
