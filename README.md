@@ -1,7 +1,7 @@
 
 # Taking Cosplace to the Next Level: Improvements to the Visual-Geolocalization model
 
-This is the pyTorch implementation of Advanced Machine Learning course project at Politecnico di Torino. It consists in an improvement of the existing Cosplace visual-geolocalization model [[ArXiv](https://arxiv.org/abs/2204.02287)]. You can find the corresponding paper [[here](https://drive.google.com/file/d/19ep7HQDm_--np0QMFtJkcciru-_A_JQ6/view?usp=share_link)].
+This is the pyTorch implementation of Advanced Machine Learning course project at Politecnico di Torino. It consists in an improvement of the existing Cosplace visual-geolocalization model [[ArXiv](https://arxiv.org/abs/2204.02287)]. You can find the corresponding paper [here](https://drive.google.com/file/d/19ep7HQDm_--np0QMFtJkcciru-_A_JQ6/view?usp=share_link).
 
 ## Authors
 The authors of this project are:
